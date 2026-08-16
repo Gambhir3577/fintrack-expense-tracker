@@ -23,8 +23,8 @@ interface CurrencyState {
 }
 
 export const useCurrencyStore = create<CurrencyState>((set, get) => ({
-  baseCurrency: 'USD',
-  storedCurrency: 'USD', // Default currency in which transactions are recorded
+  baseCurrency: 'INR',
+  storedCurrency: 'INR', // Default currency in which transactions are recorded
   rates: {},
   lastUpdated: null,
   timestamp: null,
@@ -34,7 +34,7 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
   source: '',
 
   initCurrency: async (initialBase) => {
-    const settingsCurrency = initialBase || useSettingsStore.getState().settings.currency || 'USD';
+    const settingsCurrency = initialBase || useSettingsStore.getState().settings.currency || 'INR';
     set({ baseCurrency: settingsCurrency, isLoading: true });
 
     try {

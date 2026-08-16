@@ -287,7 +287,7 @@ export const LoginPage: React.FC = () => {
                   <div className="text-right">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Balance</span>
                     <span className="text-2xl font-mono font-extrabold text-white tracking-tight">
-                      {currencyConfig.symbol}18,450.00
+                      {currencyConfig.code === 'INR' ? '₹1,84,500.00' : `${currencyConfig.symbol}18,450.00`}
                     </span>
                   </div>
                 </div>
@@ -315,7 +315,9 @@ export const LoginPage: React.FC = () => {
                   +
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-extrabold text-white">+{currencyConfig.symbol}5,400.00</p>
+                  <p className="text-xs font-extrabold text-white">
+                    +{currencyConfig.code === 'INR' ? '₹1,25,000.00' : `${currencyConfig.symbol}5,400.00`}
+                  </p>
                   <p className="text-[10px] text-slate-400 truncate">TechCorp Payroll</p>
                 </div>
               </div>

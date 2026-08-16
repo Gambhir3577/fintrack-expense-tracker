@@ -42,7 +42,7 @@ export async function initializeDatabase(): Promise<void> {
   if (!existingSettings) {
     await db.settings.put({
       id: 'app-settings',
-      currency: 'USD',
+      currency: 'INR',
       theme: 'dark',
       dateFormat: 'YYYY-MM-DD',
       firstDayOfWeek: 1,

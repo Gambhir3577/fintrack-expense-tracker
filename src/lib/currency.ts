@@ -21,8 +21,8 @@ export function convertAmount(
     return 0;
   }
 
-  const normFrom = (from || 'USD').toUpperCase();
-  const normTo = (to || 'USD').toUpperCase();
+  const normFrom = (from || 'INR').toUpperCase();
+  const normTo = (to || 'INR').toUpperCase();
 
   // Same currency: no-op
   if (normFrom === normTo) {

@@ -4,16 +4,21 @@ import { SupportedCurrency } from '../types';
 
 export function formatCurrency(
   amount: number,
-  currency: SupportedCurrency = 'USD',
+  currency: SupportedCurrency = 'INR',
   showSign: boolean = false
 ): string {
-  const config = CURRENCY_CONFIGS[currency] || CURRENCY_CONFIGS.USD;
+  const config = CURRENCY_CONFIGS[currency] || CURRENCY_CONFIGS.INR;
   const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
 
   let formattedNumber: string;
   if (currency === 'JPY') {
     formattedNumber = Math.round(absAmount).toLocaleString('en-US');
+  } else if (currency === 'INR') {
+    formattedNumber = absAmount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   } else {
     formattedNumber = absAmount.toLocaleString('en-US', {
       minimumFractionDigits: 2,
@@ -39,18 +44,30 @@ export function formatCurrency(
 
 export function formatCompactCurrency(
   amount: number,
-  currency: SupportedCurrency = 'USD'
+  currency: SupportedCurrency = 'INR'
 ): string {
-  const config = CURRENCY_CONFIGS[currency] || CURRENCY_CONFIGS.USD;
+  const config = CURRENCY_CONFIGS[currency] || CURRENCY_CONFIGS.INR;
   const absAmount = Math.abs(amount);
   let formatted: string;
 
-  if (absAmount >= 1_000_000) {
-    formatted = `${(absAmount / 1_000_000).toFixed(1)}M`;
-  } else if (absAmount >= 1_000) {
-    formatted = `${(absAmount / 1_000).toFixed(1)}k`;
+  if (currency === 'INR') {
+    if (absAmount >= 10_000_000) {
+      formatted = `${(absAmount / 10_000_000).toFixed(1)}Cr`;
+    } else if (absAmount >= 100_000) {
+      formatted = `${(absAmount / 100_000).toFixed(1)}L`;
+    } else if (absAmount >= 1_000) {
+      formatted = `${(absAmount / 1_000).toFixed(1)}k`;
+    } else {
+      formatted = absAmount.toFixed(0);
+    }
   } else {
-    formatted = absAmount.toFixed(0);
+    if (absAmount >= 1_000_000) {
+      formatted = `${(absAmount / 1_000_000).toFixed(1)}M`;
+    } else if (absAmount >= 1_000) {
+      formatted = `${(absAmount / 1_000).toFixed(1)}k`;
+    } else {
+      formatted = absAmount.toFixed(0);
+    }
   }
 
   const prefix = amount < 0 ? '-' : '';
@@ -58,15 +75,21 @@ export function formatCompactCurrency(
 }
 
 export function formatPercent(value: number, includeSign = false): string {
-  const sign = includeSign && value > 0 ? '+' : '';
-  return `${sign}${value.toFixed(1)}%`;
+  const formatted = `${value.toFixed(1)}%`;
+  if (includeSign && value > 0) {
+    return `+${formatted}`;
+  }
+  return formatted;
 }
 
-export function formatDateString(dateStr: string, formatPattern = 'MMM dd, yyyy'): string {
+export function formatDateString(
+  dateStr: string,
+  pattern: string = 'yyyy-MM-dd'
+): string {
   try {
-    const d = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
-    if (!isValid(d)) return dateStr;
-    return format(d, formatPattern);
+    const parsed = parseISO(dateStr);
+    if (!isValid(parsed)) return dateStr;
+    return format(parsed, pattern);
   } catch {
     return dateStr;
   }

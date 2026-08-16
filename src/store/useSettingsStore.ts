@@ -22,7 +22,7 @@ interface SettingsState {
 }
 
 const defaultSettings: UserSettings = {
-  currency: 'USD',
+  currency: 'INR',
   theme: 'dark',
   dateFormat: 'YYYY-MM-DD',
   firstDayOfWeek: 1,

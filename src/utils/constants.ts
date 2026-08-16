@@ -55,7 +55,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Home',
     color: '#F97316', // Orange
     type: 'expense',
-    budgetLimit: 1600,
+    budgetLimit: 35000,
     isDefault: true,
   },
   {
@@ -64,7 +64,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Utensils',
     color: '#EF4444', // Red
     type: 'expense',
-    budgetLimit: 600,
+    budgetLimit: 15000,
     isDefault: true,
   },
   {
@@ -73,7 +73,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'ShoppingCart',
     color: '#14B8A6', // Teal
     type: 'expense',
-    budgetLimit: 450,
+    budgetLimit: 12000,
     isDefault: true,
   },
   {
@@ -82,7 +82,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Car',
     color: '#6366F1', // Indigo
     type: 'expense',
-    budgetLimit: 300,
+    budgetLimit: 8000,
     isDefault: true,
   },
   {
@@ -91,7 +91,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Zap',
     color: '#EAB308', // Yellow
     type: 'expense',
-    budgetLimit: 250,
+    budgetLimit: 6000,
     isDefault: true,
   },
   {
@@ -100,7 +100,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Film',
     color: '#EC4899', // Pink
     type: 'expense',
-    budgetLimit: 200,
+    budgetLimit: 5000,
     isDefault: true,
   },
   {
@@ -109,7 +109,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'ShoppingBag',
     color: '#A855F7', // Purple
     type: 'expense',
-    budgetLimit: 350,
+    budgetLimit: 10000,
     isDefault: true,
   },
   {
@@ -118,7 +118,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'HeartPulse',
     color: '#06B6D4', // Cyan
     type: 'expense',
-    budgetLimit: 180,
+    budgetLimit: 5000,
     isDefault: true,
   },
   {
@@ -127,7 +127,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'GraduationCap',
     color: '#3B82F6', // Blue
     type: 'expense',
-    budgetLimit: 120,
+    budgetLimit: 5000,
     isDefault: true,
   },
   {
@@ -136,7 +136,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Plane',
     color: '#F43F5E', // Rose
     type: 'expense',
-    budgetLimit: 400,
+    budgetLimit: 15000,
     isDefault: true,
   },
   {
@@ -145,7 +145,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'RefreshCw',
     color: '#64748B', // Slate
     type: 'expense',
-    budgetLimit: 80,
+    budgetLimit: 2000,
     isDefault: true,
   },
   {
@@ -154,7 +154,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     icon: 'Tag',
     color: '#94A3B8', // Light slate
     type: 'expense',
-    budgetLimit: 150,
+    budgetLimit: 5000,
     isDefault: true,
   },
 ];

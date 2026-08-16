@@ -18,7 +18,7 @@ export async function loadDemoData(): Promise<void> {
   const lastMonthStr = format(subMonths(now, 1), 'yyyy-MM');
   const twoMonthsAgoStr = format(subMonths(now, 2), 'yyyy-MM');
 
-  // 1. Create Recurring Rules
+  // 1. Create Recurring Rules (in INR)
   const recurringRules: RecurrenceRule[] = [
     {
       id: 'rec-salary',
@@ -28,10 +28,10 @@ export async function loadDemoData(): Promise<void> {
       isActive: true,
       template: {
         description: 'TechCorp Monthly Salary',
-        amount: 5400,
+        amount: 125000,
         type: 'income',
         categoryId: 'cat-salary',
-        notes: 'Direct deposit after tax & 401k',
+        notes: 'Direct deposit after EPF & tax deduction',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -44,10 +44,10 @@ export async function loadDemoData(): Promise<void> {
       isActive: true,
       template: {
         description: 'Apartment Monthly Rent',
-        amount: 1550,
+        amount: 32000,
         type: 'expense',
         categoryId: 'cat-housing',
-        notes: 'Unit #402 rent via auto-pay',
+        notes: 'Apartment 3BHK rent via net banking',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -60,10 +60,10 @@ export async function loadDemoData(): Promise<void> {
       isActive: true,
       template: {
         description: 'Netflix 4K Ultra Subscription',
-        amount: 22.99,
+        amount: 649,
         type: 'expense',
         categoryId: 'cat-subscriptions',
-        notes: 'Family plan subscription',
+        notes: 'Monthly family plan',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -75,11 +75,11 @@ export async function loadDemoData(): Promise<void> {
       lastGeneratedDate: format(startOfMonth(now), 'yyyy-MM-10'),
       isActive: true,
       template: {
-        description: 'Equinox Gym Membership',
-        amount: 79.00,
+        description: 'Cult.fit Gym & Fitness Pass',
+        amount: 2499,
         type: 'expense',
         categoryId: 'cat-health',
-        notes: 'Monthly wellness & fitness pass',
+        notes: 'Monthly gym & yoga membership',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -88,28 +88,28 @@ export async function loadDemoData(): Promise<void> {
 
   await db.recurringRules.bulkAdd(recurringRules);
 
-  // 2. Create Budget Goals for the current month
+  // 2. Create Budget Goals for the current month (in INR)
   const budgetGoals: BudgetGoal[] = [
-    { id: `b-${currentMonthStr}-housing`, categoryId: 'cat-housing', monthlyLimit: 1600, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-food`, categoryId: 'cat-food', monthlyLimit: 550, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-groceries`, categoryId: 'cat-groceries', monthlyLimit: 450, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-transport`, categoryId: 'cat-transport', monthlyLimit: 280, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-utilities`, categoryId: 'cat-utilities', monthlyLimit: 220, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-entertainment`, categoryId: 'cat-entertainment', monthlyLimit: 200, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-shopping`, categoryId: 'cat-shopping', monthlyLimit: 350, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-health`, categoryId: 'cat-health', monthlyLimit: 150, period: currentMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${currentMonthStr}-subscriptions`, categoryId: 'cat-subscriptions', monthlyLimit: 75, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-housing`, categoryId: 'cat-housing', monthlyLimit: 35000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-food`, categoryId: 'cat-food', monthlyLimit: 15000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-groceries`, categoryId: 'cat-groceries', monthlyLimit: 12000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-transport`, categoryId: 'cat-transport', monthlyLimit: 8000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-utilities`, categoryId: 'cat-utilities', monthlyLimit: 6000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-entertainment`, categoryId: 'cat-entertainment', monthlyLimit: 5000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-shopping`, categoryId: 'cat-shopping', monthlyLimit: 10000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-health`, categoryId: 'cat-health', monthlyLimit: 5000, period: currentMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${currentMonthStr}-subscriptions`, categoryId: 'cat-subscriptions', monthlyLimit: 2000, period: currentMonthStr, notifyThreshold: 0.8 },
 
     // Last month budgets
-    { id: `b-${lastMonthStr}-housing`, categoryId: 'cat-housing', monthlyLimit: 1600, period: lastMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${lastMonthStr}-food`, categoryId: 'cat-food', monthlyLimit: 550, period: lastMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${lastMonthStr}-groceries`, categoryId: 'cat-groceries', monthlyLimit: 450, period: lastMonthStr, notifyThreshold: 0.8 },
-    { id: `b-${lastMonthStr}-transport`, categoryId: 'cat-transport', monthlyLimit: 280, period: lastMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${lastMonthStr}-housing`, categoryId: 'cat-housing', monthlyLimit: 35000, period: lastMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${lastMonthStr}-food`, categoryId: 'cat-food', monthlyLimit: 15000, period: lastMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${lastMonthStr}-groceries`, categoryId: 'cat-groceries', monthlyLimit: 12000, period: lastMonthStr, notifyThreshold: 0.8 },
+    { id: `b-${lastMonthStr}-transport`, categoryId: 'cat-transport', monthlyLimit: 8000, period: lastMonthStr, notifyThreshold: 0.8 },
   ];
 
   await db.budgets.bulkAdd(budgetGoals);
 
-  // 3. Generate Realistic Transactions (Past 90 days)
+  // 3. Generate Realistic Transactions (Past 90 days in INR)
   const transactions: Transaction[] = [];
 
   const addTx = (daysAgo: number, desc: string, amount: number, type: 'income' | 'expense', catId: string, isRec = false, recId?: string) => {
@@ -130,65 +130,65 @@ export async function loadDemoData(): Promise<void> {
   };
 
   // Month 3 (approx 61-90 days ago)
-  addTx(88, 'TechCorp Monthly Salary', 5400, 'income', 'cat-salary', true, 'rec-salary');
-  addTx(87, 'Apartment Monthly Rent', 1550, 'expense', 'cat-housing', true, 'rec-rent');
-  addTx(85, 'Whole Foods Grocery Run', 124.50, 'expense', 'cat-groceries');
-  addTx(82, 'Shell Gas Station Fill-up', 48.20, 'expense', 'cat-transport');
-  addTx(80, 'Equinox Gym Membership', 79.00, 'expense', 'cat-health', true, 'rec-gym');
-  addTx(78, 'Chipotle Lunch with Team', 18.50, 'expense', 'cat-food');
-  addTx(75, 'Netflix 4K Ultra Subscription', 22.99, 'expense', 'cat-subscriptions', true, 'rec-netflix');
-  addTx(73, 'Spotify Family Plan', 16.99, 'expense', 'cat-subscriptions');
-  addTx(71, 'Trader Joe’s Market', 88.40, 'expense', 'cat-groceries');
-  addTx(70, 'Electric & Gas Utility Bill', 115.30, 'expense', 'cat-utilities');
-  addTx(68, 'High-Speed Fiber Internet', 70.00, 'expense', 'cat-utilities');
-  addTx(65, 'Mobile Design Freelance Client', 1250, 'income', 'cat-freelance');
-  addTx(64, 'Cinema Tickets - IMAX 3D', 36.00, 'expense', 'cat-entertainment');
-  addTx(62, 'Amazon Electronics (USB Hub)', 45.99, 'expense', 'cat-shopping');
+  addTx(88, 'TechCorp Monthly Salary', 125000, 'income', 'cat-salary', true, 'rec-salary');
+  addTx(87, 'Apartment Monthly Rent', 32000, 'expense', 'cat-housing', true, 'rec-rent');
+  addTx(85, 'Nature Basket Grocery Run', 3450, 'expense', 'cat-groceries');
+  addTx(82, 'IndianOil Petrol Refill', 2500, 'expense', 'cat-transport');
+  addTx(80, 'Cult.fit Gym & Fitness Pass', 2499, 'expense', 'cat-health', true, 'rec-gym');
+  addTx(78, 'Swiggy Gourmet Team Lunch', 1250, 'expense', 'cat-food');
+  addTx(75, 'Netflix 4K Ultra Subscription', 649, 'expense', 'cat-subscriptions', true, 'rec-netflix');
+  addTx(73, 'Spotify Premium Annual Plan', 1199, 'expense', 'cat-subscriptions');
+  addTx(71, 'Blinkit Superfast Groceries', 1840, 'expense', 'cat-groceries');
+  addTx(70, 'Electricity & Power Bill', 2850, 'expense', 'cat-utilities');
+  addTx(68, 'Airtel Xstream Fiber Broadband', 1179, 'expense', 'cat-utilities');
+  addTx(65, 'Mobile UI/UX Freelance Client', 35000, 'income', 'cat-freelance');
+  addTx(64, 'PVR IMAX Movie Tickets & Snacks', 1600, 'expense', 'cat-entertainment');
+  addTx(62, 'Amazon Electronics (USB-C Hub)', 2499, 'expense', 'cat-shopping');
 
   // Month 2 (approx 31-60 days ago)
-  addTx(59, 'TechCorp Monthly Salary', 5400, 'income', 'cat-salary', true, 'rec-salary');
-  addTx(58, 'Apartment Monthly Rent', 1550, 'expense', 'cat-housing', true, 'rec-rent');
-  addTx(56, 'Costco Wholesale Bulk Shopping', 235.80, 'expense', 'cat-groceries');
-  addTx(54, 'Starbucks Coffee & Pastry', 9.75, 'expense', 'cat-food');
-  addTx(51, 'Uber Ride to Downtown Dinner', 24.50, 'expense', 'cat-transport');
-  addTx(50, 'Italian Bistro Dinner Date', 112.00, 'expense', 'cat-food');
-  addTx(49, 'Equinox Gym Membership', 79.00, 'expense', 'cat-health', true, 'rec-gym');
-  addTx(46, 'S&P 500 Index Dividend Payout', 145.20, 'income', 'cat-investments');
-  addTx(45, 'Netflix 4K Ultra Subscription', 22.99, 'expense', 'cat-subscriptions', true, 'rec-netflix');
-  addTx(42, 'Chevron Gasoline Refill', 52.10, 'expense', 'cat-transport');
-  addTx(40, 'Electric & Gas Utility Bill', 128.40, 'expense', 'cat-utilities');
-  addTx(38, 'Whole Foods Organic Groceries', 110.25, 'expense', 'cat-groceries');
-  addTx(35, 'Nike Air Zoom Running Shoes', 135.00, 'expense', 'cat-shopping');
-  addTx(34, 'Steam Weekend Game Sale', 49.99, 'expense', 'cat-entertainment');
-  addTx(32, 'Upwork Web Dev Project Payment', 800.00, 'income', 'cat-freelance');
+  addTx(59, 'TechCorp Monthly Salary', 125000, 'income', 'cat-salary', true, 'rec-salary');
+  addTx(58, 'Apartment Monthly Rent', 32000, 'expense', 'cat-housing', true, 'rec-rent');
+  addTx(56, 'DMart Supermarket Monthly Restock', 6850, 'expense', 'cat-groceries');
+  addTx(54, 'Starbucks Coffee & Snacks', 650, 'expense', 'cat-food');
+  addTx(51, 'Uber Ride to City Airport', 850, 'expense', 'cat-transport');
+  addTx(50, 'Barbeque Nation Dinner with Family', 4200, 'expense', 'cat-food');
+  addTx(49, 'Cult.fit Gym & Fitness Pass', 2499, 'expense', 'cat-health', true, 'rec-gym');
+  addTx(46, 'Nifty 50 Index Mutual Fund Dividend', 4500, 'income', 'cat-investments');
+  addTx(45, 'Netflix 4K Ultra Subscription', 649, 'expense', 'cat-subscriptions', true, 'rec-netflix');
+  addTx(42, 'HP Petrol Pump Fuel Refill', 2800, 'expense', 'cat-transport');
+  addTx(40, 'Tata Power Electricity Bill', 3150, 'expense', 'cat-utilities');
+  addTx(38, 'Zepto Instant Grocery Delivery', 1420, 'expense', 'cat-groceries');
+  addTx(35, 'Myntra Fashion Shopping', 4500, 'expense', 'cat-shopping');
+  addTx(34, 'BookMyShow Live Standup Comedy', 1800, 'expense', 'cat-entertainment');
+  addTx(32, 'Upwork React Web Project Payment', 28000, 'income', 'cat-freelance');
 
   // Current Month (0-30 days ago)
-  addTx(29, 'TechCorp Monthly Salary', 5400, 'income', 'cat-salary', true, 'rec-salary');
-  addTx(28, 'Apartment Monthly Rent', 1550, 'expense', 'cat-housing', true, 'rec-rent');
-  addTx(26, 'Trader Joe’s Weekly Groceries', 96.30, 'expense', 'cat-groceries');
-  addTx(24, 'Uber Ride from Airport', 38.75, 'expense', 'cat-transport');
-  addTx(22, 'Blue Bottle Coffee', 7.50, 'expense', 'cat-food');
-  addTx(20, 'Equinox Gym Membership', 79.00, 'expense', 'cat-health', true, 'rec-gym');
-  addTx(19, 'Electric & Gas Utility Bill', 108.90, 'expense', 'cat-utilities');
-  addTx(17, 'Sushi Omakase Dinner', 140.00, 'expense', 'cat-food');
-  addTx(15, 'Netflix 4K Ultra Subscription', 22.99, 'expense', 'cat-subscriptions', true, 'rec-netflix');
-  addTx(14, 'Target Home Essentials', 64.80, 'expense', 'cat-shopping');
-  addTx(12, 'Whole Foods Market', 132.40, 'expense', 'cat-groceries');
-  addTx(10, 'Freelance UI/UX Advisory', 950.00, 'income', 'cat-freelance');
-  addTx(8, 'Shell Fuel Fill-up', 46.50, 'expense', 'cat-transport');
-  addTx(6, 'Apple Music & iCloud Subscription', 14.99, 'expense', 'cat-subscriptions');
-  addTx(5, 'Artisan Sourdough Bakery & Brunch', 34.20, 'expense', 'cat-food');
-  addTx(3, 'Amazon Kindle E-Book & Tech Cable', 28.50, 'expense', 'cat-shopping');
-  addTx(2, 'Concert Tickets (Live Band)', 85.00, 'expense', 'cat-entertainment');
-  addTx(1, 'Starbucks Morning Nitro Cold Brew', 6.25, 'expense', 'cat-food');
-  addTx(0, 'Supermarket Deli Lunch & Snacks', 15.40, 'expense', 'cat-food');
+  addTx(29, 'TechCorp Monthly Salary', 125000, 'income', 'cat-salary', true, 'rec-salary');
+  addTx(28, 'Apartment Monthly Rent', 32000, 'expense', 'cat-housing', true, 'rec-rent');
+  addTx(26, 'BigBasket Organic Vegetable Order', 2640, 'expense', 'cat-groceries');
+  addTx(24, 'Ola Cab Airport Commute', 780, 'expense', 'cat-transport');
+  addTx(22, 'Third Wave Coffee Roasters', 420, 'expense', 'cat-food');
+  addTx(20, 'Cult.fit Gym & Fitness Pass', 2499, 'expense', 'cat-health', true, 'rec-gym');
+  addTx(19, 'Broadband Internet & Mobile Recharge', 1499, 'expense', 'cat-utilities');
+  addTx(17, 'Punjab Grill Fine Dining Weekend', 3850, 'expense', 'cat-food');
+  addTx(15, 'Netflix 4K Ultra Subscription', 649, 'expense', 'cat-subscriptions', true, 'rec-netflix');
+  addTx(14, 'IKEA Home Decor & Storage', 4200, 'expense', 'cat-shopping');
+  addTx(12, 'Nature Basket Supermarket', 3150, 'expense', 'cat-groceries');
+  addTx(10, 'Freelance Fintech Consultation', 42000, 'income', 'cat-freelance');
+  addTx(8, 'IndianOil Petrol Fill-up', 2400, 'expense', 'cat-transport');
+  addTx(6, 'Apple iCloud & YouTube Premium', 378, 'expense', 'cat-subscriptions');
+  addTx(5, 'Sunday Brunch at Social', 1950, 'expense', 'cat-food');
+  addTx(3, 'Amazon India Electronics Cable & Book', 999, 'expense', 'cat-shopping');
+  addTx(2, 'PVR Cinema Tickets', 800, 'expense', 'cat-entertainment');
+  addTx(1, 'Blue Tokai Morning Nitro Brew', 320, 'expense', 'cat-food');
+  addTx(0, 'Zomato Biryani Lunch Delivery', 580, 'expense', 'cat-food');
 
   await db.transactions.bulkAdd(transactions);
 
-  // Update settings onboarding flag
+  // Update settings onboarding flag to INR
   await db.settings.put({
     id: 'app-settings',
-    currency: 'USD',
+    currency: 'INR',
     theme: 'dark',
     dateFormat: 'YYYY-MM-DD',
     firstDayOfWeek: 1,
