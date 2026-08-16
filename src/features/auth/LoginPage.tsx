@@ -13,22 +13,19 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  TrendingUp,
   Sparkles,
-  CheckCircle2,
   Sun,
   Moon,
-  Star,
-  CreditCard,
   Wifi,
-  ChevronRight,
-  Fingerprint,
   PieChart,
   Repeat,
-  Wallet,
+  Fingerprint,
+  Database,
+  Check,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import confetti from 'canvas-confetti';
@@ -66,10 +63,11 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { login, signup, loginAsDemo } = useAuthStore();
-  const { settings, setCurrency, setTheme, showToast } = useSettingsStore();
+  const { login, signup } = useAuthStore();
+  const { settings, setTheme, showToast } = useSettingsStore();
+  const { baseCurrency, setBaseCurrency } = useCurrencyStore();
 
-  const currencyConfig = CURRENCY_CONFIGS[settings.currency] || CURRENCY_CONFIGS.USD;
+  const currencyConfig = CURRENCY_CONFIGS[baseCurrency] || CURRENCY_CONFIGS.INR;
 
   // Login Form
   const {
@@ -150,16 +148,9 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = async (type: 'alex' | 'sarah') => {
-    try {
-      const user = await loginAsDemo(type);
-      confetti({ particleCount: 45, spread: 65, origin: { y: 0.7 } });
-      showToast(`Logged in as ${user.name}!`, 'success');
-      navigate(from, { replace: true });
-    } catch (e) {
-      console.error(e);
-      showToast('Failed demo login', 'error');
-    }
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault();
+    showToast('A password reset link was sent to your email', 'info');
   };
 
   const handleThemeToggle = () => {
@@ -170,13 +161,8 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen w-full aurora-bg text-slate-100 flex flex-col justify-between selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-hidden font-sans">
       
       {/* 3-Color Dynamic Animated Glow Orbs */}
-      {/* Orb 1: Emerald Mint */}
       <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-emerald-500/20 dark:bg-emerald-500/25 blur-[130px] pointer-events-none animate-orb-1" />
-      
-      {/* Orb 2: Electric Cyan / Sky */}
       <div className="absolute top-[30%] right-[-10%] w-[650px] h-[650px] rounded-full bg-cyan-500/20 dark:bg-cyan-500/20 blur-[150px] pointer-events-none animate-orb-2" />
-      
-      {/* Orb 3: Royal Violet / Fuchsia */}
       <div className="absolute bottom-[-15%] left-[25%] w-[600px] h-[600px] rounded-full bg-indigo-500/20 dark:bg-violet-600/25 blur-[140px] pointer-events-none animate-orb-3" />
 
       {/* Modern High-Tech Micro Grid Pattern */}
@@ -207,8 +193,8 @@ export const LoginPage: React.FC = () => {
         <div className="flex items-center gap-3">
           {/* Currency Switcher */}
           <select
-            value={settings.currency}
-            onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
+            value={baseCurrency}
+            onChange={(e) => setBaseCurrency(e.target.value as SupportedCurrency)}
             className="bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
           >
             {Object.values(CURRENCY_CONFIGS).map((curr) => (
@@ -253,7 +239,7 @@ export const LoginPage: React.FC = () => {
             </h1>
 
             <p className="text-sm text-slate-400 leading-relaxed max-w-lg">
-              Manage multi-currency cash flow, import bank statements with smart auto-categorization, automate recurring rules, and stay on budget — entirely private on your device.
+              Manage multi-currency cash flow with live exchange rates, import bank statements with smart auto-categorization, automate recurring rules, and stay on budget — entirely private on your device.
             </p>
 
             {/* 💳 Holographic Interactive Metal Card */}
@@ -386,11 +372,11 @@ export const LoginPage: React.FC = () => {
               {/* Title */}
               <div className="mb-6">
                 <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-                  {mode === 'login' ? 'Welcome back' : 'Start your financial journey'}
+                  {mode === 'login' ? 'Welcome back to FinTrack' : 'Start your financial journey'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   {mode === 'login'
-                    ? 'Enter your credentials or use 1-click demo access below'
+                    ? 'Enter your credentials to access your financial dashboard'
                     : 'Create your private profile in seconds — no backend required'}
                 </p>
               </div>
@@ -421,9 +407,13 @@ export const LoginPage: React.FC = () => {
                       <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
                         Password
                       </label>
-                      <span className="text-xs text-emerald-400 font-semibold cursor-pointer hover:underline">
-                        Demo password: any
-                      </span>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
+                      >
+                        Forgot password?
+                      </button>
                     </div>
                     <div className="relative rounded-xl border border-slate-800 bg-slate-950 focus-within:border-emerald-500 transition-colors">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -600,58 +590,38 @@ export const LoginPage: React.FC = () => {
                 </form>
               )}
 
-              {/* 1-Click Quick Demo Login Divider */}
-              <div className="relative my-6 text-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-800" />
+              {/* Security & Client-Side Privacy Card */}
+              <div className="mt-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-start gap-3 shadow-inner">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <Fingerprint className="w-4 h-4" />
                 </div>
-                <span className="relative px-3 bg-slate-900 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                  Instant Demo Persona Preview
-                </span>
+                <div className="text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-white">
+                    <span>Encrypted Local Vault</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Zero-cloud storage. Your financial transactions and budgets are saved exclusively on your local device via IndexedDB.
+                  </p>
+                </div>
               </div>
 
-              {/* Quick Persona Demo Login Cards */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('alex')}
-                  className="p-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800/80 text-left border border-slate-800 transition-all hover:border-emerald-500/50 group"
-                >
-                  <div className="flex items-center gap-2">
-                    <img
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80"
-                      alt="Alex"
-                      className="w-7 h-7 rounded-full object-cover border border-emerald-500/40"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white group-hover:text-emerald-300 truncate">
-                        Alex Morgan
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate">Lead Designer</p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('sarah')}
-                  className="p-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800/80 text-left border border-slate-800 transition-all hover:border-emerald-500/50 group"
-                >
-                  <div className="flex items-center gap-2">
-                    <img
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80"
-                      alt="Sarah"
-                      className="w-7 h-7 rounded-full object-cover border border-teal-500/40"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white group-hover:text-teal-300 truncate">
-                        Sarah Jenkins
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate">Tech Founder</p>
-                    </div>
-                  </div>
-                </button>
+              {/* Trust badges */}
+              <div className="grid grid-cols-3 gap-2 mt-3 text-[10px] text-slate-400 text-center font-medium">
+                <div className="p-1.5 rounded-lg bg-slate-950/50 border border-slate-800/60 flex items-center justify-center gap-1">
+                  <Check className="w-3 h-3 text-emerald-400" />
+                  <span>100% Offline</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-950/50 border border-slate-800/60 flex items-center justify-center gap-1">
+                  <Check className="w-3 h-3 text-cyan-400" />
+                  <span>No Tracking</span>
+                </div>
+                <div className="p-1.5 rounded-lg bg-slate-950/50 border border-slate-800/60 flex items-center justify-center gap-1">
+                  <Check className="w-3 h-3 text-purple-400" />
+                  <span>Free Forever</span>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
