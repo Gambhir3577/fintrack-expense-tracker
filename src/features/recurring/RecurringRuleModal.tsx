@@ -8,6 +8,7 @@ import { RecurrenceRule, RecurrenceFrequency } from '../../types';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { ArrowUpRight, ArrowDownLeft, Calendar, Tag } from 'lucide-react';
 
@@ -38,8 +39,9 @@ export const RecurringRuleModal: React.FC<RecurringRuleModalProps> = ({
 }) => {
   const { addRule, updateRule } = useRecurringStore();
   const { categories } = useCategoryStore();
-  const { settings, showToast } = useSettingsStore();
-  const currencyConfig = CURRENCY_CONFIGS[settings.currency] || CURRENCY_CONFIGS.USD;
+  const { showToast } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
+  const currencyConfig = CURRENCY_CONFIGS[baseCurrency] || CURRENCY_CONFIGS.INR;
 
   const {
     register,

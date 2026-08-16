@@ -17,6 +17,7 @@ import { RecurrenceRule, Category } from '../../types';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { formatCurrency, formatDateString } from '../../utils/formatters';
 import { computeNextScheduledDate } from '../../utils/recurringEngine';
 import { IconRenderer } from '../../components/common/IconRenderer';
@@ -27,7 +28,8 @@ import { EmptyState } from '../../components/common/EmptyState';
 export const RecurringPage: React.FC = () => {
   const { rules, isProcessing, toggleRuleActive, deleteRule, processRecurringRules } = useRecurringStore();
   const { categories } = useCategoryStore();
-  const { settings, showToast } = useSettingsStore();
+  const { showToast } = useSettingsStore();
+  const { baseCurrency, convert } = useCurrencyStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<RecurrenceRule | null>(null);
@@ -60,7 +62,8 @@ export const RecurringPage: React.FC = () => {
       else if (rule.frequency === 'weekly') mult = 4.33;
       else if (rule.frequency === 'yearly') mult = 1 / 12;
 
-      const monthlyAmount = rule.template.amount * mult;
+      const convertedAmount = convert(rule.template.amount);
+      const monthlyAmount = convertedAmount * mult;
       if (rule.template.type === 'income') {
         monthlyIncome += monthlyAmount;
       } else {
@@ -69,7 +72,7 @@ export const RecurringPage: React.FC = () => {
     });
 
     return { activeCount, monthlyIncome, monthlyExpense };
-  }, [rules]);
+  }, [rules, convert]);
 
   const handleProcessDue = async () => {
     try {
@@ -150,7 +153,7 @@ export const RecurringPage: React.FC = () => {
           </p>
           <div className="flex items-center justify-between">
             <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-400">
-              +{formatCurrency(metrics.monthlyIncome, settings.currency)}
+              +{formatCurrency(metrics.monthlyIncome, baseCurrency)}
             </h3>
             <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
               <ArrowUpRight className="w-5 h-5" />
@@ -164,7 +167,7 @@ export const RecurringPage: React.FC = () => {
           </p>
           <div className="flex items-center justify-between">
             <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-100">
-              -{formatCurrency(metrics.monthlyExpense, settings.currency)}
+              -{formatCurrency(metrics.monthlyExpense, baseCurrency)}
             </h3>
             <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
               <ArrowDownLeft className="w-5 h-5" />
@@ -227,7 +230,7 @@ export const RecurringPage: React.FC = () => {
                         isIncome ? 'text-emerald-400' : 'text-slate-100'
                       }`}
                     >
-                      {isIncome ? '+' : '-'}{formatCurrency(rule.template.amount, settings.currency)}
+                      {isIncome ? '+' : '-'}{formatCurrency(convert(rule.template.amount), baseCurrency)}
                     </span>
                   </div>
                 </div>

@@ -16,6 +16,7 @@ import { parseCSVFile, detectColumnMapping, processParsedRows } from '../../util
 import { useTransactionStore } from '../../store/useTransactionStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { CSVColumnMapping, CSVParsedRow, TransactionType } from '../../types';
 import { formatCurrency, formatDateString } from '../../utils/formatters';
 import { IconRenderer } from '../../components/common/IconRenderer';
@@ -27,7 +28,8 @@ export const CSVImportPage: React.FC = () => {
 
   const { transactions, bulkAddTransactions } = useTransactionStore();
   const { categories } = useCategoryStore();
-  const { settings, showToast } = useSettingsStore();
+  const { showToast } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
 
   // Wizard Steps: 1: Upload -> 2: Map Columns -> 3: Preview & Confirm
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -539,7 +541,7 @@ export const CSVImportPage: React.FC = () => {
                               isIncome ? 'text-emerald-400' : 'text-slate-100'
                             }`}
                           >
-                            {isIncome ? '+' : '-'}{formatCurrency(row.mapped.amount, settings.currency)}
+                            {isIncome ? '+' : '-'}{formatCurrency(row.mapped.amount, baseCurrency)}
                           </span>
                         </td>
 

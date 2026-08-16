@@ -3,6 +3,7 @@ import { Modal } from '../../components/common/Modal';
 import { Category, BudgetGoal } from '../../types';
 import { useBudgetStore } from '../../store/useBudgetStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { IconRenderer } from '../../components/common/IconRenderer';
 import { Target, DollarSign } from 'lucide-react';
@@ -25,8 +26,9 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 }) => {
   const [limit, setLimit] = useState<string>('');
   const { setBudgetGoal } = useBudgetStore();
-  const { settings, showToast } = useSettingsStore();
-  const currencyConfig = CURRENCY_CONFIGS[settings.currency] || CURRENCY_CONFIGS.USD;
+  const { showToast } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
+  const currencyConfig = CURRENCY_CONFIGS[baseCurrency] || CURRENCY_CONFIGS.INR;
 
   useEffect(() => {
     if (isOpen) {

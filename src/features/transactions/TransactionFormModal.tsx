@@ -9,6 +9,7 @@ import { useTransactionStore } from '../../store/useTransactionStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { IconRenderer } from '../../components/common/IconRenderer';
 import { ArrowUpRight, ArrowDownLeft, Calendar, Tag, FileText, Repeat } from 'lucide-react';
@@ -40,9 +41,10 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const { addTransaction, updateTransaction } = useTransactionStore();
   const { categories } = useCategoryStore();
   const { addRule } = useRecurringStore();
-  const { settings, showToast } = useSettingsStore();
+  const { showToast } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
 
-  const currencyConfig = CURRENCY_CONFIGS[settings.currency] || CURRENCY_CONFIGS.USD;
+  const currencyConfig = CURRENCY_CONFIGS[baseCurrency] || CURRENCY_CONFIGS.INR;
 
   const {
     register,

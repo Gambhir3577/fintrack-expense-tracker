@@ -12,6 +12,7 @@ import { Category } from '../../types';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useTransactionStore } from '../../store/useTransactionStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { formatCurrency } from '../../utils/formatters';
 import { IconRenderer } from '../../components/common/IconRenderer';
 import { CategoryModal } from './CategoryModal';
@@ -20,7 +21,8 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 export const CategoriesPage: React.FC = () => {
   const { categories, deleteCategory } = useCategoryStore();
   const { transactions } = useTransactionStore();
-  const { settings, showToast } = useSettingsStore();
+  const { showToast } = useSettingsStore();
+  const { baseCurrency, convert } = useCurrencyStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -34,12 +36,12 @@ export const CategoriesPage: React.FC = () => {
       const curr = statsMap.get(tx.categoryId) || { count: 0, total: 0 };
       statsMap.set(tx.categoryId, {
         count: curr.count + 1,
-        total: curr.total + tx.amount,
+        total: curr.total + convert(tx.amount),
       });
     });
 
     return statsMap;
-  }, [transactions]);
+  }, [transactions, convert]);
 
   const expenseCategories = categories.filter((c) => c.type === 'expense' || c.type === 'both');
   const incomeCategories = categories.filter((c) => c.type === 'income');
@@ -50,8 +52,8 @@ export const CategoriesPage: React.FC = () => {
       await deleteCategory(deletingId);
       showToast('Category deleted', 'info');
       setDeletingId(null);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       showToast('Failed to delete category', 'error');
     }
   };
@@ -62,14 +64,14 @@ export const CategoriesPage: React.FC = () => {
     return (
       <div
         key={cat.id}
-        className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5 flex items-center justify-between hover:border-slate-700 transition-all shadow-md"
+        className="rounded-2xl bg-slate-900/70 border border-slate-800 p-4 flex items-center justify-between hover:border-slate-700 transition-all shadow-md group"
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 border"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 border shadow-inner"
             style={{
-              backgroundColor: `${cat.color}18`,
-              borderColor: `${cat.color}35`,
+              backgroundColor: `${cat.color}20`,
+              borderColor: `${cat.color}40`,
               color: cat.color,
             }}
           >
@@ -86,7 +88,7 @@ export const CategoriesPage: React.FC = () => {
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              {stats.count} transaction{stats.count === 1 ? '' : 's'} • {formatCurrency(stats.total, settings.currency)} total
+              {stats.count} transaction{stats.count === 1 ? '' : 's'} • {formatCurrency(stats.total, baseCurrency)} total
             </p>
           </div>
         </div>

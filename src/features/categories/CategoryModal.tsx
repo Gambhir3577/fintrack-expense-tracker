@@ -6,6 +6,7 @@ import { Modal } from '../../components/common/Modal';
 import { Category, TransactionType } from '../../types';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { AVAILABLE_ICONS, PALETTE_COLORS, CURRENCY_CONFIGS } from '../../utils/constants';
 import { IconRenderer } from '../../components/common/IconRenderer';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
@@ -32,8 +33,9 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   initialData,
 }) => {
   const { addCategory, updateCategory } = useCategoryStore();
-  const { settings, showToast } = useSettingsStore();
-  const currencyConfig = CURRENCY_CONFIGS[settings.currency] || CURRENCY_CONFIGS.USD;
+  const { showToast } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
+  const currencyConfig = CURRENCY_CONFIGS[baseCurrency] || CURRENCY_CONFIGS.INR;
 
   const {
     register,

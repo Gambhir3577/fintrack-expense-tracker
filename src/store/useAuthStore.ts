@@ -16,10 +16,41 @@ interface AuthState {
 
 const STORAGE_KEY = 'fintrack_auth_user';
 
+function getStoredUser(): UserProfile {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as UserProfile;
+      if (parsed && parsed.name && parsed.email) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse stored user:', e);
+  }
+
+  // Default initial profile for instant seamless first launch
+  const initialUser: UserProfile = {
+    id: 'usr-primary',
+    name: 'Alex Morgan',
+    email: 'alex.morgan@fintrack.app',
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    joinedAt: new Date().toISOString(),
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialUser));
+  } catch {}
+
+  return initialUser;
+}
+
+const initialUser = getStoredUser();
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
+  user: initialUser,
+  isAuthenticated: true,
+  isLoading: false,
 
   loadAuth: () => {
     try {
@@ -32,19 +63,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (e) {
       console.error('Failed to restore auth session:', e);
     }
-    set({ user: null, isAuthenticated: false, isLoading: false });
+    const defaultUser = getStoredUser();
+    set({ user: defaultUser, isAuthenticated: true, isLoading: false });
   },
 
   login: async (email: string, name?: string) => {
     set({ isLoading: true });
-    // Simulate instantaneous async auth
-    await new Promise((r) => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 300));
 
     const user: UserProfile = {
       id: `usr-${Date.now()}`,
       name: name || email.split('@')[0].replace('.', ' ').replace(/^./, (c) => c.toUpperCase()),
       email,
-      avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80`,
+      avatarUrl: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80`,
       joinedAt: new Date().toISOString(),
     };
 
@@ -55,7 +86,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signup: async (name: string, email: string) => {
     set({ isLoading: true });
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 400));
 
     const user: UserProfile = {
       id: `usr-${Date.now()}`,
@@ -72,7 +103,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loginAsDemo: async (demoType = 'alex') => {
     set({ isLoading: true });
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 200));
 
     const user: UserProfile = demoType === 'sarah'
       ? {
@@ -102,10 +133,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   updateProfile: (updates) => {
     set((state) => {
-      if (!state.user) return state;
-      const updated = { ...state.user, ...updates };
+      const currentUser = state.user || getStoredUser();
+      const updated = { ...currentUser, ...updates };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return { user: updated };
+      return { user: updated, isAuthenticated: true };
     });
   },
 }));
