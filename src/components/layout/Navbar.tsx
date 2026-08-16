@@ -1,0 +1,91 @@
+import React from 'react';
+import { Plus, Sun, Moon, DollarSign, Menu } from 'lucide-react';
+import { useSettingsStore } from '../../store/useSettingsStore';
+import { CURRENCY_CONFIGS } from '../../utils/constants';
+import { SupportedCurrency } from '../../types';
+
+interface NavbarProps {
+  onOpenAddModal: () => void;
+  onToggleMobileMenu: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenAddModal,
+  onToggleMobileMenu,
+}) => {
+  const { settings, setCurrency, setTheme } = useSettingsStore();
+
+  const handleThemeToggle = () => {
+    const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+  };
+
+  return (
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 sm:px-6">
+      {/* Left Branding / Mobile Hamburger */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggleMobileMenu}
+          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 md:hidden focus:outline-none"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/20 font-extrabold text-lg">
+            <DollarSign className="w-5 h-5 stroke-[2.5]" />
+          </div>
+          <div>
+            <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-emerald-400 bg-clip-text text-transparent">
+              FinTrack
+            </span>
+            <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              Pro
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Controls */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Currency Selector */}
+        <div className="relative">
+          <select
+            value={settings.currency}
+            onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
+            className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/60 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
+          >
+            {Object.values(CURRENCY_CONFIGS).map((curr) => (
+              <option key={curr.code} value={curr.code}>
+                {curr.code} ({curr.symbol})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Theme Switcher */}
+        <button
+          onClick={handleThemeToggle}
+          title={`Switch to ${settings.theme === 'dark' ? 'light' : 'dark'} mode`}
+          className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white transition-colors focus:outline-none"
+        >
+          {settings.theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-indigo-400" />
+          )}
+        </button>
+
+        {/* Add Transaction Action */}
+        <button
+          onClick={onOpenAddModal}
+          className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all active:scale-95"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          <span className="hidden xs:inline">New Entry</span>
+        </button>
+      </div>
+    </header>
+  );
+};
