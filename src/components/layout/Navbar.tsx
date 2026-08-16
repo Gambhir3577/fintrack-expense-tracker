@@ -119,6 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <img
                   src={user.avatarUrl}
                   alt={user.name}
+                  style={{ width: '24px', height: '24px', minWidth: '24px', maxWidth: '24px' }}
                   className="w-6 h-6 rounded-full object-cover border border-emerald-500/40"
                 />
               ) : (

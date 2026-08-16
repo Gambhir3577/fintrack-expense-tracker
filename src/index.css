@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
-
 @layer base {
   :root {
     --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -17,6 +15,11 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }
+
+  img {
+    max-width: 100%;
+    display: inline-block;
+  }
 }
 
 /* 🌈 Creative Multi-Color Aurora Mesh Background */
@@ -30,6 +33,7 @@
   background-attachment: fixed;
 }
 
+html.light .aurora-bg,
 .light .aurora-bg {
   background-color: #f8fafc;
   background-image: 
@@ -86,97 +90,70 @@
   animation: floatOrb3 18s ease-in-out infinite;
 }
 
-/* Light Theme Overrides */
+/* Clean Light Mode Styling */
 html.light,
 html.light body {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
-html.light .bg-slate-950,
-html.light .bg-slate-950\/60,
-html.light .bg-slate-950\/80 {
-  background-color: #f1f5f9 !important;
+html.light header {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: #e2e8f0;
 }
 
-html.light header.bg-slate-950\/80 {
-  background-color: rgba(255, 255, 255, 0.88) !important;
-  border-color: #e2e8f0 !important;
-}
-
-html.light aside.bg-slate-950\/60 {
-  background-color: rgba(248, 250, 252, 0.92) !important;
-  border-color: #e2e8f0 !important;
+html.light aside {
+  background-color: rgba(248, 250, 252, 0.95);
+  border-color: #e2e8f0;
 }
 
 html.light .bg-slate-900,
-html.light .bg-slate-900\/40,
-html.light .bg-slate-900\/60,
-html.light .bg-slate-900\/70,
-html.light .bg-slate-900\/80,
-html.light .bg-slate-900\/85,
-html.light .bg-slate-900\/90,
-html.light .bg-slate-900\/95 {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+html.light .bg-slate-950 {
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
-html.light .bg-slate-800,
-html.light .bg-slate-800\/40,
-html.light .bg-slate-800\/60 {
-  background-color: #f1f5f9 !important;
+html.light .bg-slate-800 {
+  background-color: #f1f5f9;
 }
 
 html.light .border-slate-800,
-html.light .border-slate-800\/60,
-html.light .border-slate-800\/80,
-html.light .border-slate-700,
-html.light .border-slate-700\/60 {
-  border-color: #e2e8f0 !important;
+html.light .border-slate-700 {
+  border-color: #e2e8f0;
 }
 
 html.light .text-white,
 html.light .text-slate-100,
 html.light .text-slate-200 {
-  color: #0f172a !important;
-}
-
-html.light .text-slate-300 {
-  color: #334155 !important;
+  color: #0f172a;
 }
 
 html.light .text-slate-400 {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 html.light .text-slate-500 {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 html.light input,
 html.light select,
 html.light textarea {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
 html.light input:focus,
 html.light select:focus,
 html.light textarea:focus {
-  border-color: #10b981 !important;
+  border-color: #10b981;
 }
 
 html.light table thead {
-  background-color: #f1f5f9 !important;
-  color: #475569 !important;
-  border-color: #e2e8f0 !important;
-}
-
-html.light .hover\:bg-slate-800:hover,
-html.light .hover\:bg-slate-800\/40:hover,
-html.light .hover\:bg-slate-700:hover {
-  background-color: #f1f5f9 !important;
+  background-color: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
 }
 
 /* Glassmorphism & UI Utilities */
@@ -192,20 +169,6 @@ html.light .hover\:bg-slate-700:hover {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.glass-card {
-  background: rgba(30, 41, 59, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.light .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 /* Custom Scrollbars */

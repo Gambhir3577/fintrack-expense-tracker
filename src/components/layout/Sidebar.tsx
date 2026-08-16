@@ -121,6 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <img
                   src={user.avatarUrl}
                   alt={user.name}
+                  style={{ width: '32px', height: '32px', minWidth: '32px', maxWidth: '32px' }}
                   className="w-8 h-8 rounded-full object-cover border border-emerald-500/40 shrink-0"
                 />
               ) : (

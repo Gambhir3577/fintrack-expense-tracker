@@ -268,6 +268,7 @@ export const SettingsPage: React.FC = () => {
                 <img
                   src={user.avatarUrl}
                   alt={user.name || 'User Avatar'}
+                  style={{ width: '112px', height: '112px', minWidth: '112px', maxWidth: '112px' }}
                   className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-emerald-500/50 shadow-xl shadow-emerald-500/10 transition-transform group-hover:scale-105"
                 />
               ) : (
