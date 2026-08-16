@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { DashboardPage } from './features/dashboard/DashboardPage';
@@ -8,12 +8,32 @@ import { RecurringPage } from './features/recurring/RecurringPage';
 import { CSVImportPage } from './features/import/CSVImportPage';
 import { CategoriesPage } from './features/categories/CategoriesPage';
 import { SettingsPage } from './features/settings/SettingsPage';
+import { LoginPage } from './features/auth/LoginPage';
+import { AuthGuard } from './features/auth/AuthGuard';
+import { useAuthStore } from './store/useAuthStore';
 
 export function App() {
+  const { loadAuth } = useAuthStore();
+
+  useEffect(() => {
+    loadAuth();
+  }, [loadAuth]);
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AppLayout />}>
+        {/* Public Login / Auth Route */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected Dashboard & Feature Routes */}
+        <Route
+          path="/"
+          element={
+            <AuthGuard>
+              <AppLayout />
+            </AuthGuard>
+          }
+        >
           <Route index element={<DashboardPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="budgets" element={<BudgetsPage />} />
@@ -21,8 +41,10 @@ export function App() {
           <Route path="import" element={<CSVImportPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
+
+        {/* Catch-all Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

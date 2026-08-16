@@ -1,8 +1,10 @@
-import React from 'react';
-import { Plus, Sun, Moon, DollarSign, Menu } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   onOpenAddModal: () => void;
@@ -13,11 +15,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAddModal,
   onToggleMobileMenu,
 }) => {
+  const navigate = useNavigate();
   const { settings, setCurrency, setTheme } = useSettingsStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleThemeToggle = () => {
     const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -32,7 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/20 font-extrabold text-lg">
             <DollarSign className="w-5 h-5 stroke-[2.5]" />
           </div>
@@ -85,6 +95,67 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span className="hidden xs:inline">New Entry</span>
         </button>
+
+        {/* User Profile Pill / Menu */}
+        {isAuthenticated && user && (
+          <div className="relative ml-1">
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/60 transition-all focus:outline-none"
+            >
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="w-6 h-6 rounded-full object-cover border border-emerald-500/40"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
+                  {user.name.charAt(0)}
+                </div>
+              )}
+              <span className="hidden sm:inline text-xs font-semibold text-slate-200 truncate max-w-[100px]">
+                {user.name}
+              </span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isUserMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsUserMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900/95 border border-slate-800 p-2 shadow-2xl backdrop-blur-xl z-50 animate-fade-in text-xs space-y-1">
+                  <div className="p-2.5 border-b border-slate-800 mb-1">
+                    <p className="font-bold text-white truncate">{user.name}</p>
+                    <p className="text-slate-400 text-[11px] truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                  >
+                    <User className="w-4 h-4 text-emerald-400" />
+                    <span>Account Settings</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors font-semibold"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

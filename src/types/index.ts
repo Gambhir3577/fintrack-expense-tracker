@@ -70,6 +70,14 @@ export interface UserSettings {
   hasCompletedOnboarding: boolean;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  joinedAt: string;
+}
+
 export interface CSVColumnMapping {
   date: string;
   description: string;

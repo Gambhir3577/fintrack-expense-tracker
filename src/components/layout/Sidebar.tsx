@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Receipt,
@@ -10,6 +10,7 @@ import {
   Settings,
   Sparkles,
   X,
+  LogOut,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { loadDemoData } from '../../db/seedData';
@@ -18,6 +19,7 @@ import { useCategoryStore } from '../../store/useCategoryStore';
 import { useBudgetStore } from '../../store/useBudgetStore';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface SidebarProps {
   isMobileOpen: boolean;
@@ -28,11 +30,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen,
   onCloseMobile,
 }) => {
+  const navigate = useNavigate();
   const { loadTransactions } = useTransactionStore();
   const { loadCategories } = useCategoryStore();
   const { loadBudgets } = useBudgetStore();
   const { loadRules } = useRecurringStore();
   const { showToast } = useSettingsStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
 
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -59,6 +63,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       console.error(err);
       showToast('Failed to load demo data', 'error');
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    onCloseMobile();
+    navigate('/login');
   };
 
   const navContent = (
@@ -102,21 +112,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      {/* Bottom Demo Card */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 text-center shadow-lg">
-        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-2">
-          <Sparkles className="w-4 h-4" />
+      <div className="space-y-3 pt-4 border-t border-slate-800/80">
+        {/* User Card */}
+        {isAuthenticated && user && (
+          <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full object-cover border border-emerald-500/40 shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold shrink-0 text-xs">
+                  {user.name.charAt(0)}
+                </div>
+              )}
+              <div className="truncate">
+                <p className="text-xs font-bold text-white truncate">{user.name}</p>
+                <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Sign Out"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Bottom Demo Card */}
+        <div className="p-3 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 text-center shadow-lg">
+          <div className="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
+          </div>
+          <h5 className="text-[11px] font-bold text-white mb-0.5">Quick Demo Data</h5>
+          <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
+            Populate 90 days of realistic history and budgets.
+          </p>
+          <button
+            onClick={handleLoadDemo}
+            className="w-full py-1.5 px-2 text-[11px] font-semibold rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-all"
+          >
+            Load Demo Dataset
+          </button>
         </div>
-        <h5 className="text-xs font-bold text-white mb-1">Quick Demo Data</h5>
-        <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
-          Populate 90 days of realistic history, budgets, and recurring rules.
-        </p>
-        <button
-          onClick={handleLoadDemo}
-          className="w-full py-1.5 px-2 text-xs font-semibold rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-all"
-        >
-          Load Demo Dataset
-        </button>
       </div>
     </div>
   );

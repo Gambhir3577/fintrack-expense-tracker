@@ -10,6 +10,7 @@ import { useCategoryStore } from '../../store/useCategoryStore';
 import { useBudgetStore } from '../../store/useBudgetStore';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,10 +22,12 @@ export const AppLayout: React.FC = () => {
   const { loadBudgets } = useBudgetStore();
   const { loadRules, processRecurringRules } = useRecurringStore();
   const { loadSettings, showToast } = useSettingsStore();
+  const { loadAuth } = useAuthStore();
 
   useEffect(() => {
     async function init() {
       try {
+        loadAuth();
         await initializeDatabase();
         await Promise.all([
           loadSettings(),
