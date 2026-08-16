@@ -301,31 +301,33 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Floating Dynamic Notification Pills around Card */}
-              <div className="absolute -top-1 right-2 p-2.5 rounded-2xl bg-slate-900/95 border border-emerald-500/30 shadow-xl backdrop-blur-xl flex items-center gap-2.5 animate-bounce [animation-duration:4s]">
-                <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
+            {/* Quick Metrics Row Below Card */}
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 flex items-center gap-3 shadow-md">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
                   +
                 </div>
-                <div className="text-xs">
-                  <p className="font-bold text-white">+{currencyConfig.symbol}5,400.00</p>
-                  <p className="text-[10px] text-slate-400">TechCorp Payroll</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold text-white">+{currencyConfig.symbol}5,400.00</p>
+                  <p className="text-[10px] text-slate-400 truncate">TechCorp Payroll</p>
                 </div>
               </div>
 
-              <div className="absolute -bottom-3 left-4 p-2.5 rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-xl backdrop-blur-xl flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
-                  <PieChart className="w-3.5 h-3.5" />
+              <div className="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 flex items-center gap-3 shadow-md">
+                <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+                  <PieChart className="w-4 h-4" />
                 </div>
-                <div className="text-xs">
-                  <p className="font-bold text-white">42.5% Savings Rate</p>
-                  <p className="text-[10px] text-emerald-400 font-semibold">On Track Target 🎯</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold text-white">42.5% Savings Rate</p>
+                  <p className="text-[10px] text-emerald-400 font-semibold truncate">Target On Track 🎯</p>
                 </div>
               </div>
             </div>
 
-            {/* Feature Pills */}
-            <div className="grid grid-cols-3 gap-3 pt-3">
+            {/* Feature Highlights Grid */}
+            <div className="grid grid-cols-3 gap-3 pt-1">
               <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
                 <Zap className="w-4 h-4 text-emerald-400 mb-1" />
                 <p className="text-xs font-bold text-white">Instant Sync</p>
