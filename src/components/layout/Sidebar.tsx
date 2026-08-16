@@ -11,6 +11,7 @@ import {
   Sparkles,
   X,
   LogOut,
+  Bot,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { loadDemoData } from '../../db/seedData';
@@ -40,6 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/ai-assistant', label: 'AI Intelligence', icon: Bot, badge: 'AI Copilot' },
     { to: '/transactions', label: 'Transactions', icon: Receipt },
     { to: '/budgets', label: 'Budget Goals', icon: Target },
     { to: '/recurring', label: 'Recurring Rules', icon: Repeat },
@@ -97,15 +99,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onCloseMobile}
                 className={({ isActive }) =>
                   clsx(
-                    'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
+                    'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
                     isActive
                       ? 'bg-emerald-500/15 text-emerald-400 font-semibold border border-emerald-500/20 shadow-sm shadow-emerald-500/10'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 border border-transparent'
                   )
                 }
               >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-500/30">
+                    {item.badge}
+                  </span>
+                )}
               </NavLink>
             );
           })}

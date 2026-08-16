@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User, RefreshCw } from 'lucide-react';
+import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User, RefreshCw, Bot } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useCurrencyStore } from '../../store/currencyStore';
+import { useAIStore } from '../../store/useAIStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { settings, setTheme } = useSettingsStore();
   const { user, logout, isAuthenticated } = useAuthStore();
   const { baseCurrency, setBaseCurrency, isLoading: isCurrencyLoading, isFallback } = useCurrencyStore();
+  const { toggleOpen: toggleAIOpen } = useAIStore();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleThemeToggle = () => {
@@ -97,6 +99,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <Moon className="w-4 h-4 text-indigo-400" />
           )}
+        </button>
+
+        {/* AI Copilot Quick Action */}
+        <button
+          onClick={toggleAIOpen}
+          title="Open AI Financial Copilot"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 shadow-sm transition-all focus:outline-none"
+        >
+          <Bot className="w-4 h-4 text-emerald-400" />
+          <span className="hidden md:inline">AI Copilot</span>
         </button>
 
         {/* Add Transaction Action */}

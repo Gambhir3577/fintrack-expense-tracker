@@ -8,6 +8,7 @@ import { RecurringPage } from './features/recurring/RecurringPage';
 import { CSVImportPage } from './features/import/CSVImportPage';
 import { CategoriesPage } from './features/categories/CategoriesPage';
 import { SettingsPage } from './features/settings/SettingsPage';
+import { AIAssistantPage } from './features/ai/AIAssistantPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { AuthGuard } from './features/auth/AuthGuard';
 import { useAuthStore } from './store/useAuthStore';
@@ -35,6 +36,7 @@ export function App() {
           }
         >
           <Route index element={<DashboardPage />} />
+          <Route path="ai-assistant" element={<AIAssistantPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="budgets" element={<BudgetsPage />} />
           <Route path="recurring" element={<RecurringPage />} />

@@ -24,6 +24,9 @@ import {
   Calendar,
   Mail,
   Edit3,
+  Bot,
+  Zap,
+  Key,
 } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -32,6 +35,7 @@ import { useCategoryStore } from '../../store/useCategoryStore';
 import { useBudgetStore } from '../../store/useBudgetStore';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useCurrencyStore } from '../../store/currencyStore';
+import { useAIStore } from '../../store/useAIStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import { exportTransactionsToCSV, exportFullBackupJSON, restoreBackupFromJSON } from '../../utils/exportImport';
@@ -94,6 +98,7 @@ export const SettingsPage: React.FC = () => {
     isLoading: isRatesLoading,
     refreshRates,
   } = useCurrencyStore();
+  const { keyConfig, setKeyConfig } = useAIStore();
 
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [isDemoConfirmOpen, setIsDemoConfirmOpen] = useState(false);
@@ -538,6 +543,115 @@ export const SettingsPage: React.FC = () => {
                   </div>
                 ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* 🤖 AI Financial Copilot & Intelligence Engine Configuration */}
+      <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-6 space-y-6 shadow-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Bot className="w-5 h-5 text-emerald-400" />
+              AI Intelligence Engine & Models
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Configure your preferred intelligence engine for financial auditing, automated categorization, and conversational assistance.
+            </p>
+          </div>
+          <span className="text-[10px] uppercase font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            {keyConfig.provider === 'local' ? 'Offline Private' : `${keyConfig.provider.toUpperCase()} Cloud`}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Option 1: Local Neural Rules */}
+          <button
+            type="button"
+            onClick={() => setKeyConfig({ provider: 'local' })}
+            className={`p-4 rounded-xl border text-left transition-all relative ${
+              keyConfig.provider === 'local'
+                ? 'bg-emerald-500/10 border-emerald-500/50 shadow-md shadow-emerald-500/10'
+                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white">Local Rule Engine</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                Recommended
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              100% offline & private. Zero latency, no API key needed. Runs directly on your device.
+            </p>
+            {keyConfig.provider === 'local' && (
+              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            )}
+          </button>
+
+          {/* Option 2: Google Gemini */}
+          <button
+            type="button"
+            onClick={() => setKeyConfig({ provider: 'gemini' })}
+            className={`p-4 rounded-xl border text-left transition-all relative ${
+              keyConfig.provider === 'gemini'
+                ? 'bg-cyan-500/10 border-cyan-500/50 shadow-md shadow-cyan-500/10'
+                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white">Google Gemini</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">
+                1.5 Flash
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Fast, powerful reasoning for complex queries and budgeting strategies.
+            </p>
+          </button>
+
+          {/* Option 3: OpenAI */}
+          <button
+            type="button"
+            onClick={() => setKeyConfig({ provider: 'openai' })}
+            className={`p-4 rounded-xl border text-left transition-all relative ${
+              keyConfig.provider === 'openai'
+                ? 'bg-purple-500/10 border-purple-500/50 shadow-md shadow-purple-500/10'
+                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white">OpenAI GPT</span>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">
+                4o-mini
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Advanced natural language financial advisory with personalized planning.
+            </p>
+          </button>
+        </div>
+
+        {/* API Key Input if cloud provider chosen */}
+        {keyConfig.provider !== 'local' && (
+          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 animate-fade-in">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+              {keyConfig.provider === 'gemini' ? 'Google AI Studio Gemini API Key' : 'OpenAI API Key'}
+            </label>
+            <div className="relative">
+              <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="password"
+                value={keyConfig.apiKey || ''}
+                onChange={(e) => setKeyConfig({ apiKey: e.target.value.trim() })}
+                placeholder={keyConfig.provider === 'gemini' ? 'AIzaSy...' : 'sk-proj-...'}
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none font-mono"
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">
+              🔒 Your API key is stored securely in local browser storage only and is never transmitted to any central servers.
+            </p>
           </div>
         )}
       </div>

@@ -14,6 +14,9 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
+import { AIFloatingButton } from '../ai/AIFloatingButton';
+import { AIChatDrawer } from '../ai/AIChatDrawer';
+
 export const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -98,6 +101,10 @@ export const AppLayout: React.FC = () => {
       </div>
 
       <Toast />
+
+      {/* Global AI Copilot Button & Slide-over Drawer */}
+      <AIFloatingButton />
+      <AIChatDrawer />
 
       {/* Global Add Transaction Modal */}
       <TransactionFormModal
