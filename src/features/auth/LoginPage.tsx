@@ -167,19 +167,24 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full aurora-bg text-slate-100 flex flex-col justify-between selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-hidden font-sans">
       
-      {/* Background Animated Gradient Meshes */}
-      <div className="absolute top-[-10%] left-[-10%] w-[650px] h-[650px] rounded-full bg-gradient-to-br from-emerald-600/15 via-teal-500/10 to-transparent blur-[140px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[-15%] right-[-10%] w-[700px] h-[700px] rounded-full bg-gradient-to-tl from-cyan-600/15 via-indigo-500/10 to-transparent blur-[160px] pointer-events-none" />
-      <div className="absolute top-[40%] right-[35%] w-[400px] h-[400px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none" />
+      {/* 3-Color Dynamic Animated Glow Orbs */}
+      {/* Orb 1: Emerald Mint */}
+      <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-emerald-500/20 dark:bg-emerald-500/25 blur-[130px] pointer-events-none animate-orb-1" />
+      
+      {/* Orb 2: Electric Cyan / Sky */}
+      <div className="absolute top-[30%] right-[-10%] w-[650px] h-[650px] rounded-full bg-cyan-500/20 dark:bg-cyan-500/20 blur-[150px] pointer-events-none animate-orb-2" />
+      
+      {/* Orb 3: Royal Violet / Fuchsia */}
+      <div className="absolute bottom-[-15%] left-[25%] w-[600px] h-[600px] rounded-full bg-indigo-500/20 dark:bg-violet-600/25 blur-[140px] pointer-events-none animate-orb-3" />
 
-      {/* Grid Pattern Overlay */}
+      {/* Modern High-Tech Micro Grid Pattern */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
-          backgroundSize: '32px 32px',
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
         }}
       />
 
