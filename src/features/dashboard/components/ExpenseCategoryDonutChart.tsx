@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { format } from 'date-fns';
 import { Transaction, Category } from '../../../types';
 import { formatCurrency, formatPercent } from '../../../utils/formatters';
-import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useCurrencyStore } from '../../../store/currencyStore';
 import { IconRenderer } from '../../../components/common/IconRenderer';
 
 interface ExpenseCategoryDonutChartProps {
@@ -15,7 +15,7 @@ export const ExpenseCategoryDonutChart: React.FC<ExpenseCategoryDonutChartProps>
   transactions,
   categories,
 }) => {
-  const { settings } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
   const currentMonthStr = format(new Date(), 'yyyy-MM');
 
   const { chartData, totalExpense } = useMemo(() => {
@@ -81,7 +81,7 @@ export const ExpenseCategoryDonutChart: React.FC<ExpenseCategoryDonutChartProps>
                               <span className="text-xs font-bold text-white">{d.name}</span>
                             </div>
                             <p className="text-xs font-extrabold text-white">
-                              {formatCurrency(d.amount, settings.currency)} ({formatPercent(d.percentage)})
+                              {formatCurrency(d.amount, baseCurrency)} ({formatPercent(d.percentage)})
                             </p>
                           </div>
                         );
@@ -109,7 +109,7 @@ export const ExpenseCategoryDonutChart: React.FC<ExpenseCategoryDonutChartProps>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Spent</span>
                 <span className="text-lg font-extrabold text-white">
-                  {formatCurrency(totalExpense, settings.currency)}
+                  {formatCurrency(totalExpense, baseCurrency)}
                 </span>
               </div>
             </>
@@ -135,7 +135,7 @@ export const ExpenseCategoryDonutChart: React.FC<ExpenseCategoryDonutChartProps>
                 </div>
               </div>
               <span className="text-xs font-bold text-white shrink-0 ml-1">
-                {formatCurrency(cat.amount, settings.currency)}
+                {formatCurrency(cat.amount, baseCurrency)}
               </span>
             </div>
           ))}

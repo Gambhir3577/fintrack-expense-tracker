@@ -9,17 +9,17 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
-import { subMonths, format, startOfMonth } from 'date-fns';
+import { subMonths, format } from 'date-fns';
 import { Transaction } from '../../../types';
 import { formatCompactCurrency, formatCurrency } from '../../../utils/formatters';
-import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useCurrencyStore } from '../../../store/currencyStore';
 
 interface MonthlyComparisonBarChartProps {
   transactions: Transaction[];
 }
 
 export const MonthlyComparisonBarChart: React.FC<MonthlyComparisonBarChartProps> = ({ transactions }) => {
-  const { settings } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
 
   const chartData = useMemo(() => {
     const months: Array<{ period: string; label: string; income: number; expense: number; net: number }> = [];
@@ -55,7 +55,7 @@ export const MonthlyComparisonBarChart: React.FC<MonthlyComparisonBarChartProps>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h4 className="text-base font-bold text-white tracking-tight">Income vs Expenses</h4>
-          <p className="text-xs text-slate-400 mt-0.5">Historical comparison over the last 6 months</p>
+          <p className="text-xs text-slate-400 mt-0.5">Historical comparison in <strong className="text-slate-200">{baseCurrency}</strong></p>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export const MonthlyComparisonBarChart: React.FC<MonthlyComparisonBarChartProps>
               fontSize={11}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(val) => formatCompactCurrency(val, settings.currency)}
+              tickFormatter={(val) => formatCompactCurrency(val, baseCurrency)}
             />
             <Tooltip
               content={({ active, payload }) => {
@@ -89,18 +89,18 @@ export const MonthlyComparisonBarChart: React.FC<MonthlyComparisonBarChartProps>
                           <span className="flex items-center gap-1.5 text-emerald-400">
                             <span className="w-2 h-2 rounded-sm bg-emerald-400" /> Income:
                           </span>
-                          <span className="font-bold text-white">{formatCurrency(data.income, settings.currency)}</span>
+                          <span className="font-bold text-white">{formatCurrency(data.income, baseCurrency)}</span>
                         </div>
                         <div className="flex items-center justify-between gap-4">
                           <span className="flex items-center gap-1.5 text-rose-400">
                             <span className="w-2 h-2 rounded-sm bg-rose-400" /> Expense:
                           </span>
-                          <span className="font-bold text-white">{formatCurrency(data.expense, settings.currency)}</span>
+                          <span className="font-bold text-white">{formatCurrency(data.expense, baseCurrency)}</span>
                         </div>
                         <div className="pt-1.5 mt-1.5 border-t border-slate-800 flex items-center justify-between gap-4">
                           <span className="text-slate-400">Net Balance:</span>
                           <span className={`font-bold ${data.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {formatCurrency(data.net, settings.currency, true)}
+                            {formatCurrency(data.net, baseCurrency, true)}
                           </span>
                         </div>
                       </div>

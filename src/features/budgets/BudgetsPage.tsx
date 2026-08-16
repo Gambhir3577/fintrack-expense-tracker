@@ -9,13 +9,12 @@ import {
   Edit2,
   Plus,
   ShieldAlert,
-  Sparkles,
 } from 'lucide-react';
 import { format, subMonths, addMonths, parse } from 'date-fns';
 import { useTransactionStore } from '../../store/useTransactionStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useBudgetStore } from '../../store/useBudgetStore';
-import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { calculateMonthlyCategorySpending, calculateMonthlyBudgetOverview } from '../../utils/budgetCalculations';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import { IconRenderer } from '../../components/common/IconRenderer';
@@ -26,7 +25,7 @@ export const BudgetsPage: React.FC = () => {
   const { transactions } = useTransactionStore();
   const { categories } = useCategoryStore();
   const { budgets, selectedPeriod, setSelectedPeriod } = useBudgetStore();
-  const { settings } = useSettingsStore();
+  const { baseCurrency, convert, rates } = useCurrencyStore();
 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
@@ -49,12 +48,27 @@ export const BudgetsPage: React.FC = () => {
     setSelectedPeriod(format(next, 'yyyy-MM'));
   };
 
+  // Convert transactions and budget limits to baseCurrency
+  const convertedTransactions = useMemo(() => {
+    return transactions.map((t) => ({
+      ...t,
+      amount: convert(t.amount),
+    }));
+  }, [transactions, convert, baseCurrency, rates]);
+
+  const convertedBudgets = useMemo(() => {
+    return budgets.map((b) => ({
+      ...b,
+      monthlyLimit: convert(b.monthlyLimit),
+    }));
+  }, [budgets, convert, baseCurrency, rates]);
+
   // Spending calculations for selected period
   const { summaries, overview } = useMemo(() => {
-    const s = calculateMonthlyCategorySpending(transactions, categories, budgets, selectedPeriod);
+    const s = calculateMonthlyCategorySpending(convertedTransactions, categories, convertedBudgets, selectedPeriod);
     const o = calculateMonthlyBudgetOverview(s, parsedCurrentPeriodDate);
     return { summaries: s, overview: o };
-  }, [transactions, categories, budgets, selectedPeriod, parsedCurrentPeriodDate]);
+  }, [convertedTransactions, categories, convertedBudgets, selectedPeriod, parsedCurrentPeriodDate]);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
@@ -64,9 +78,14 @@ export const BudgetsPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Budget Goals
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Track category spending limits and maintain financial discipline
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm text-slate-400">
+              Track category spending limits and maintain financial discipline
+            </p>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
+              {baseCurrency}
+            </span>
+          </div>
         </div>
 
         {/* Period Selector Controls */}
@@ -101,7 +120,7 @@ export const BudgetsPage: React.FC = () => {
               Total Monthly Budget
             </p>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {formatCurrency(overview.totalBudget, settings.currency)}
+              {formatCurrency(overview.totalBudget, baseCurrency)}
             </h3>
           </div>
 
@@ -110,7 +129,7 @@ export const BudgetsPage: React.FC = () => {
               Total Spent
             </p>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {formatCurrency(overview.totalSpent, settings.currency)}
+              {formatCurrency(overview.totalSpent, baseCurrency)}
             </h3>
           </div>
 
@@ -123,7 +142,7 @@ export const BudgetsPage: React.FC = () => {
                 overview.totalRemaining > 0 ? 'text-emerald-400' : 'text-rose-400'
               }`}
             >
-              {formatCurrency(overview.totalRemaining, settings.currency)}
+              {formatCurrency(overview.totalRemaining, baseCurrency)}
             </h3>
           </div>
 
@@ -235,8 +254,8 @@ export const BudgetsPage: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-white">
-                        {formatCurrency(item.spent, settings.currency)}
-                        <span className="font-normal text-slate-400"> of {formatCurrency(item.budgetLimit, settings.currency)}</span>
+                        {formatCurrency(item.spent, baseCurrency)}
+                        <span className="font-normal text-slate-400"> of {formatCurrency(item.budgetLimit, baseCurrency)}</span>
                       </span>
                       <span
                         className={`font-semibold ${
@@ -262,17 +281,17 @@ export const BudgetsPage: React.FC = () => {
                       {item.isOverBudget ? (
                         <span className="inline-flex items-center gap-1 font-semibold text-rose-400">
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          Over budget by {formatCurrency(item.spent - item.budgetLimit, settings.currency)}
+                          Over budget by {formatCurrency(item.spent - item.budgetLimit, baseCurrency)}
                         </span>
                       ) : item.isNearLimit ? (
                         <span className="inline-flex items-center gap-1 font-semibold text-amber-400">
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          Near limit — {formatCurrency(item.remaining, settings.currency)} left
+                          Near limit — {formatCurrency(item.remaining, baseCurrency)} left
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-slate-400">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                          {formatCurrency(item.remaining, settings.currency)} remaining
+                          {formatCurrency(item.remaining, baseCurrency)} remaining
                         </span>
                       )}
                     </div>
@@ -282,7 +301,7 @@ export const BudgetsPage: React.FC = () => {
                     <div>
                       <span className="text-xs font-semibold text-slate-400">Spent so far:</span>
                       <p className="text-sm font-bold text-white">
-                        {formatCurrency(item.spent, settings.currency)}
+                        {formatCurrency(item.spent, baseCurrency)}
                       </p>
                     </div>
 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Target, AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { CategorySpendingSummary } from '../../../types';
 import { formatCurrency, formatPercent } from '../../../utils/formatters';
-import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useCurrencyStore } from '../../../store/currencyStore';
 
 interface BudgetHealthWidgetProps {
   overview: {
@@ -21,7 +21,7 @@ export const BudgetHealthWidget: React.FC<BudgetHealthWidgetProps> = ({
   overview,
   topSummaries,
 }) => {
-  const { settings } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
 
   const isOver = overview.overallPercentage > 100;
   const isWarning = overview.overallPercentage >= 80 && !isOver;
@@ -40,7 +40,7 @@ export const BudgetHealthWidget: React.FC<BudgetHealthWidgetProps> = ({
             </div>
             <div>
               <h4 className="text-base font-bold text-white tracking-tight">Budget Health</h4>
-              <p className="text-xs text-slate-400">Monthly spending pace</p>
+              <p className="text-xs text-slate-400">Monthly spending pace in <strong className="text-slate-200">{baseCurrency}</strong></p>
             </div>
           </div>
 
@@ -70,10 +70,10 @@ export const BudgetHealthWidget: React.FC<BudgetHealthWidgetProps> = ({
             <div>
               <div className="flex items-center justify-between text-xs mb-1.5">
                 <span className="font-semibold text-slate-300">
-                  {formatCurrency(overview.totalSpent, settings.currency)} spent
+                  {formatCurrency(overview.totalSpent, baseCurrency)} spent
                 </span>
                 <span className="text-slate-400">
-                  of {formatCurrency(overview.totalBudget, settings.currency)} limit
+                  of {formatCurrency(overview.totalBudget, baseCurrency)} limit
                 </span>
               </div>
               <div className="h-3 w-full rounded-full bg-slate-800 overflow-hidden relative">
@@ -110,7 +110,7 @@ export const BudgetHealthWidget: React.FC<BudgetHealthWidgetProps> = ({
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-slate-300 truncate">{item.category.name}</span>
                     <span className={`font-semibold ${item.isOverBudget ? 'text-rose-400' : 'text-slate-400'}`}>
-                      {formatCurrency(item.spent, settings.currency)} / {formatCurrency(item.budgetLimit, settings.currency)}
+                      {formatCurrency(item.spent, baseCurrency)} / {formatCurrency(item.budgetLimit, baseCurrency)}
                     </span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">

@@ -8,11 +8,12 @@ import {
   UploadCloud,
   Sparkles,
 } from 'lucide-react';
-import { format, subMonths, startOfMonth } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import { useTransactionStore } from '../../store/useTransactionStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useBudgetStore } from '../../store/useBudgetStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import { calculateMonthlyCategorySpending, calculateMonthlyBudgetOverview, calculateSavingsRate } from '../../utils/budgetCalculations';
 import { StatCard } from '../../components/common/StatCard';
@@ -31,7 +32,8 @@ export const DashboardPage: React.FC = () => {
   const { transactions, loadTransactions } = useTransactionStore();
   const { categories, loadCategories } = useCategoryStore();
   const { budgets, loadBudgets } = useBudgetStore();
-  const { settings, showToast } = useSettingsStore();
+  const { showToast } = useSettingsStore();
+  const { baseCurrency, convert, rates } = useCurrencyStore();
 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -40,7 +42,7 @@ export const DashboardPage: React.FC = () => {
   const currentMonthStr = format(now, 'yyyy-MM');
   const lastMonthStr = format(subMonths(now, 1), 'yyyy-MM');
 
-  // KPI Calculations
+  // KPI Calculations with Live Currency Conversion
   const metrics = useMemo(() => {
     let totalAllTimeIncome = 0;
     let totalAllTimeExpense = 0;
@@ -50,17 +52,18 @@ export const DashboardPage: React.FC = () => {
     let lastMonthExpense = 0;
 
     transactions.forEach((tx) => {
+      const convertedAmount = convert(tx.amount);
       const isCurrentMonth = tx.date.startsWith(currentMonthStr);
       const isLastMonth = tx.date.startsWith(lastMonthStr);
 
       if (tx.type === 'income') {
-        totalAllTimeIncome += tx.amount;
-        if (isCurrentMonth) currentMonthIncome += tx.amount;
-        if (isLastMonth) lastMonthIncome += tx.amount;
+        totalAllTimeIncome += convertedAmount;
+        if (isCurrentMonth) currentMonthIncome += convertedAmount;
+        if (isLastMonth) lastMonthIncome += convertedAmount;
       } else {
-        totalAllTimeExpense += tx.amount;
-        if (isCurrentMonth) currentMonthExpense += tx.amount;
-        if (isLastMonth) lastMonthExpense += tx.amount;
+        totalAllTimeExpense += convertedAmount;
+        if (isCurrentMonth) currentMonthExpense += convertedAmount;
+        if (isLastMonth) lastMonthExpense += convertedAmount;
       }
     });
 
@@ -88,14 +91,30 @@ export const DashboardPage: React.FC = () => {
       expenseTrend,
       savingsRateDiff,
     };
-  }, [transactions, currentMonthStr, lastMonthStr]);
+  }, [transactions, currentMonthStr, lastMonthStr, baseCurrency, rates, convert]);
+
+  // Convert transactions for budget calculations
+  const convertedTransactions = useMemo(() => {
+    return transactions.map((tx) => ({
+      ...tx,
+      amount: convert(tx.amount),
+    }));
+  }, [transactions, convert, baseCurrency, rates]);
+
+  // Converted budgets
+  const convertedBudgets = useMemo(() => {
+    return budgets.map((b) => ({
+      ...b,
+      monthlyLimit: convert(b.monthlyLimit),
+    }));
+  }, [budgets, convert, baseCurrency, rates]);
 
   // Budget calculations
   const { spendingSummaries, budgetOverview } = useMemo(() => {
-    const summaries = calculateMonthlyCategorySpending(transactions, categories, budgets, currentMonthStr);
+    const summaries = calculateMonthlyCategorySpending(convertedTransactions, categories, convertedBudgets, currentMonthStr);
     const overview = calculateMonthlyBudgetOverview(summaries, now);
     return { spendingSummaries: summaries, budgetOverview: overview };
-  }, [transactions, categories, budgets, currentMonthStr]);
+  }, [convertedTransactions, categories, convertedBudgets, currentMonthStr]);
 
   const handleLoadDemo = async () => {
     try {
@@ -116,9 +135,12 @@ export const DashboardPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Financial Dashboard
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Overview for <span className="text-slate-200 font-semibold">{format(now, 'MMMM yyyy')}</span>
-          </p>
+          <div className="flex items-center gap-2 text-sm text-slate-400 mt-1">
+            <span>Overview for <strong className="text-slate-200">{format(now, 'MMMM yyyy')}</strong></span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
+              {baseCurrency}
+            </span>
+          </div>
         </div>
 
         {/* Quick Action Buttons */}
@@ -155,8 +177,8 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
           title="Total Net Balance"
-          value={formatCurrency(metrics.netBalance, settings.currency)}
-          subtitle="Cumulative net worth"
+          value={formatCurrency(metrics.netBalance, baseCurrency)}
+          subtitle={`Converted to ${baseCurrency}`}
           icon={Wallet}
           iconColor="text-emerald-400"
           iconBgColor="bg-emerald-500/10 border-emerald-500/20"
@@ -165,7 +187,7 @@ export const DashboardPage: React.FC = () => {
 
         <StatCard
           title="Monthly Income"
-          value={formatCurrency(metrics.currentMonthIncome, settings.currency)}
+          value={formatCurrency(metrics.currentMonthIncome, baseCurrency)}
           trend={{
             value: metrics.incomeTrend,
             label: 'vs last month',
@@ -178,7 +200,7 @@ export const DashboardPage: React.FC = () => {
 
         <StatCard
           title="Monthly Expenses"
-          value={formatCurrency(metrics.currentMonthExpense, settings.currency)}
+          value={formatCurrency(metrics.currentMonthExpense, baseCurrency)}
           trend={{
             value: metrics.expenseTrend,
             label: 'vs last month',
@@ -206,17 +228,17 @@ export const DashboardPage: React.FC = () => {
       {/* Top Charts Row: Cash Flow Trend (2 cols) + Category Donut (1 col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <CashFlowTrendChart transactions={transactions} />
+          <CashFlowTrendChart transactions={convertedTransactions} />
         </div>
         <div className="lg:col-span-1">
-          <ExpenseCategoryDonutChart transactions={transactions} categories={categories} />
+          <ExpenseCategoryDonutChart transactions={convertedTransactions} categories={categories} />
         </div>
       </div>
 
       {/* Second Charts Row: Monthly Bar Chart (2 cols) + Budget Health (1 col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <MonthlyComparisonBarChart transactions={transactions} />
+          <MonthlyComparisonBarChart transactions={convertedTransactions} />
         </div>
         <div className="lg:col-span-1">
           <BudgetHealthWidget

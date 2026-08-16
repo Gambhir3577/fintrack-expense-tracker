@@ -8,10 +8,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { subDays, format, parseISO, eachDayOfInterval, startOfDay } from 'date-fns';
+import { subDays, format, eachDayOfInterval, startOfDay } from 'date-fns';
 import { Transaction } from '../../../types';
 import { formatCurrency, formatCompactCurrency } from '../../../utils/formatters';
-import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useCurrencyStore } from '../../../store/currencyStore';
 
 interface CashFlowTrendChartProps {
   transactions: Transaction[];
@@ -19,7 +19,7 @@ interface CashFlowTrendChartProps {
 
 export const CashFlowTrendChart: React.FC<CashFlowTrendChartProps> = ({ transactions }) => {
   const [daysRange, setDaysRange] = useState<30 | 90 | 365>(30);
-  const { settings } = useSettingsStore();
+  const { baseCurrency } = useCurrencyStore();
 
   const chartData = useMemo(() => {
     const today = startOfDay(new Date());
@@ -62,7 +62,7 @@ export const CashFlowTrendChart: React.FC<CashFlowTrendChartProps> = ({ transact
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h4 className="text-base font-bold text-white tracking-tight">Cumulative Cash Flow Trend</h4>
-          <p className="text-xs text-slate-400 mt-0.5">Net financial trajectory over selected time horizon</p>
+          <p className="text-xs text-slate-400 mt-0.5">Net financial trajectory in <strong className="text-slate-200">{baseCurrency}</strong></p>
         </div>
 
         {/* Range Toggle */}
@@ -111,7 +111,7 @@ export const CashFlowTrendChart: React.FC<CashFlowTrendChartProps> = ({ transact
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(val) => formatCompactCurrency(val, settings.currency)}
+                tickFormatter={(val) => formatCompactCurrency(val, baseCurrency)}
               />
               <Tooltip
                 content={({ active, payload }) => {
@@ -123,18 +123,18 @@ export const CashFlowTrendChart: React.FC<CashFlowTrendChartProps> = ({ transact
                         <div className="space-y-1 text-xs">
                           <p className="font-bold text-emerald-400 flex items-center justify-between gap-4">
                             <span>Net Cumulative:</span>
-                            <span>{formatCurrency(data.netFlow, settings.currency, true)}</span>
+                            <span>{formatCurrency(data.netFlow, baseCurrency, true)}</span>
                           </p>
                           {data.income > 0 && (
                             <p className="text-slate-300 flex items-center justify-between gap-4">
                               <span className="text-slate-400">Income:</span>
-                              <span className="text-emerald-400">+{formatCurrency(data.income, settings.currency)}</span>
+                              <span className="text-emerald-400">+{formatCurrency(data.income, baseCurrency)}</span>
                             </p>
                           )}
                           {data.expense > 0 && (
                             <p className="text-slate-300 flex items-center justify-between gap-4">
                               <span className="text-slate-400">Expense:</span>
-                              <span className="text-rose-400">-{formatCurrency(data.expense, settings.currency)}</span>
+                              <span className="text-rose-400">-{formatCurrency(data.expense, baseCurrency)}</span>
                             </p>
                           )}
                         </div>

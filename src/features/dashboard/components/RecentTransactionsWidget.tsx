@@ -4,6 +4,7 @@ import { ArrowUpRight, ArrowDownLeft, ChevronRight, Receipt, Repeat } from 'luci
 import { Transaction, Category } from '../../../types';
 import { formatCurrency, formatDateString } from '../../../utils/formatters';
 import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useCurrencyStore } from '../../../store/currencyStore';
 import { IconRenderer } from '../../../components/common/IconRenderer';
 
 interface RecentTransactionsWidgetProps {
@@ -18,6 +19,7 @@ export const RecentTransactionsWidget: React.FC<RecentTransactionsWidgetProps> =
   onSelectTransaction,
 }) => {
   const { settings } = useSettingsStore();
+  const { baseCurrency, convert } = useCurrencyStore();
   const recentList = transactions.slice(0, 5);
 
   const getCategory = (id: string) => {
@@ -95,7 +97,7 @@ export const RecentTransactionsWidget: React.FC<RecentTransactionsWidgetProps> =
                     }`}
                   >
                     {isIncome ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4 text-slate-500" />}
-                    {isIncome ? '+' : '-'}{formatCurrency(tx.amount, settings.currency)}
+                    {isIncome ? '+' : '-'}{formatCurrency(convert(tx.amount), baseCurrency)}
                   </span>
                 </div>
               </div>

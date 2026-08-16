@@ -20,6 +20,7 @@ import { Transaction, Category } from '../../types';
 import { useTransactionStore } from '../../store/useTransactionStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { formatCurrency, formatDateString } from '../../utils/formatters';
 import { exportTransactionsToCSV } from '../../utils/exportImport';
 import { IconRenderer } from '../../components/common/IconRenderer';
@@ -48,6 +49,7 @@ export const TransactionsPage: React.FC = () => {
 
   const { categories } = useCategoryStore();
   const { settings, showToast } = useSettingsStore();
+  const { baseCurrency, convert } = useCurrencyStore();
 
   // Local state for modals & selection
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -158,9 +160,14 @@ export const TransactionsPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Transactions
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            {filteredTransactions.length} transaction{filteredTransactions.length === 1 ? '' : 's'} found
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm text-slate-400">
+              {filteredTransactions.length} transaction{filteredTransactions.length === 1 ? '' : 's'} found
+            </p>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold">
+              {baseCurrency}
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
@@ -384,6 +391,7 @@ export const TransactionsPage: React.FC = () => {
                   >
                     <div className="flex items-center justify-end gap-1.5">
                       <span>Amount</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono font-bold">{baseCurrency}</span>
                       <ArrowUpDown className="w-3.5 h-3.5" />
                     </div>
                   </th>
@@ -439,7 +447,7 @@ export const TransactionsPage: React.FC = () => {
                             isIncome ? 'text-emerald-400' : 'text-slate-200'
                           }`}
                         >
-                          {isIncome ? '+' : '-'}{formatCurrency(tx.amount, settings.currency)}
+                          {isIncome ? '+' : '-'}{formatCurrency(convert(tx.amount), baseCurrency)}
                         </span>
                       </td>
                       <td className="p-4 text-center">
@@ -520,7 +528,7 @@ export const TransactionsPage: React.FC = () => {
                           isIncome ? 'text-emerald-400' : 'text-slate-100'
                         }`}
                       >
-                        {isIncome ? '+' : '-'}{formatCurrency(tx.amount, settings.currency)}
+                        {isIncome ? '+' : '-'}{formatCurrency(convert(tx.amount), baseCurrency)}
                       </p>
                     </div>
                   </div>

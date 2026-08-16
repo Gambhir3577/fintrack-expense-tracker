@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User } from 'lucide-react';
+import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User, RefreshCw } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import { useNavigate } from 'react-router-dom';
@@ -16,8 +17,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleMobileMenu,
 }) => {
   const navigate = useNavigate();
-  const { settings, setCurrency, setTheme } = useSettingsStore();
+  const { settings, setTheme } = useSettingsStore();
   const { user, logout, isAuthenticated } = useAuthStore();
+  const { baseCurrency, setBaseCurrency, isLoading: isCurrencyLoading, isFallback } = useCurrencyStore();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleThemeToggle = () => {
@@ -59,12 +61,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Currency Selector */}
-        <div className="relative">
+        {/* Live Currency Selector */}
+        <div className="relative flex items-center">
           <select
-            value={settings.currency}
-            onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
-            className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/60 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer"
+            value={baseCurrency}
+            onChange={(e) => setBaseCurrency(e.target.value as SupportedCurrency)}
+            className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/60 rounded-xl pl-2.5 pr-7 py-1.5 text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors cursor-pointer appearance-none"
           >
             {Object.values(CURRENCY_CONFIGS).map((curr) => (
               <option key={curr.code} value={curr.code}>
@@ -72,6 +74,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </option>
             ))}
           </select>
+          {/* Live Status indicator */}
+          <div className="absolute right-2 pointer-events-none flex items-center">
+            {isCurrencyLoading ? (
+              <RefreshCw className="w-3 h-3 text-emerald-400 animate-spin" />
+            ) : isFallback ? (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Using cached/fallback rates" />
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Live exchange rates active" />
+            )}
+          </div>
         </div>
 
         {/* Theme Switcher */}

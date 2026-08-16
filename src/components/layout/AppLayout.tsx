@@ -11,6 +11,8 @@ import { useBudgetStore } from '../../store/useBudgetStore';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useCurrencyStore } from '../../store/currencyStore';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,6 +25,7 @@ export const AppLayout: React.FC = () => {
   const { loadRules, processRecurringRules } = useRecurringStore();
   const { loadSettings, showToast } = useSettingsStore();
   const { loadAuth } = useAuthStore();
+  const { initCurrency, isFallback, error, refreshRates, isLoading: isCurrencyLoading } = useCurrencyStore();
 
   useEffect(() => {
     async function init() {
@@ -35,6 +38,7 @@ export const AppLayout: React.FC = () => {
           loadTransactions(),
           loadBudgets(),
           loadRules(),
+          initCurrency(),
         ]);
 
         // Auto-run recurring engine
@@ -57,6 +61,24 @@ export const AppLayout: React.FC = () => {
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
+
+      {/* Non-blocking Exchange Rate Warning / Offline Banner */}
+      {isFallback && error && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-xs text-amber-300 flex items-center justify-between gap-2 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => refreshRates(true)}
+            disabled={isCurrencyLoading}
+            className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3 h-3 ${isCurrencyLoading ? 'animate-spin' : ''}`} />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-1">
         <Sidebar
