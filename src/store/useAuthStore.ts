@@ -16,7 +16,7 @@ interface AuthState {
 
 const STORAGE_KEY = 'fintrack_auth_user';
 
-function getStoredUser(): UserProfile {
+function getStoredUser(): UserProfile | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -28,28 +28,14 @@ function getStoredUser(): UserProfile {
   } catch (e) {
     console.error('Failed to parse stored user:', e);
   }
-
-  // Default initial profile for instant seamless first launch
-  const initialUser: UserProfile = {
-    id: 'usr-primary',
-    name: 'Alex Morgan',
-    email: 'alex.morgan@fintrack.app',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    joinedAt: new Date().toISOString(),
-  };
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialUser));
-  } catch {}
-
-  return initialUser;
+  return null;
 }
 
 const initialUser = getStoredUser();
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: initialUser,
-  isAuthenticated: true,
+  isAuthenticated: !!initialUser,
   isLoading: false,
 
   loadAuth: () => {
@@ -57,14 +43,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const user = JSON.parse(stored) as UserProfile;
-        set({ user, isAuthenticated: true, isLoading: false });
-        return;
+        if (user && user.email) {
+          set({ user, isAuthenticated: true, isLoading: false });
+          return;
+        }
       }
     } catch (e) {
       console.error('Failed to restore auth session:', e);
     }
-    const defaultUser = getStoredUser();
-    set({ user: defaultUser, isAuthenticated: true, isLoading: false });
+    set({ user: null, isAuthenticated: false, isLoading: false });
   },
 
   login: async (email: string, name?: string) => {
@@ -133,8 +120,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   updateProfile: (updates) => {
     set((state) => {
-      const currentUser = state.user || getStoredUser();
-      const updated = { ...currentUser, ...updates };
+      if (!state.user) return state;
+      const updated = { ...state.user, ...updates };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return { user: updated, isAuthenticated: true };
     });
