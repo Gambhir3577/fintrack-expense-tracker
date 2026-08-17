@@ -1,0 +1,9 @@
+services:
+  fintrack:
+    build: .
+    container_name: fintrack-expense-tracker
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
