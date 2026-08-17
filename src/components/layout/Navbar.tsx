@@ -7,6 +7,7 @@ import { useAIStore } from '../../store/useAIStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../common/BrandLogo';
 
 interface NavbarProps {
   onOpenAddModal: () => void;
@@ -46,19 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/20 font-extrabold text-lg">
-            <DollarSign className="w-5 h-5 stroke-[2.5]" />
-          </div>
-          <div>
-            <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-emerald-400 bg-clip-text text-transparent">
-              FinTrack
-            </span>
-            <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Pro
-            </span>
-          </div>
-        </div>
+        <BrandLogo size="md" />
       </div>
 
       {/* Right Controls */}

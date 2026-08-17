@@ -28,6 +28,7 @@ import { useSettingsStore } from '../../store/useSettingsStore';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
+import { BrandLogo } from '../../components/common/BrandLogo';
 import confetti from 'canvas-confetti';
 
 const loginSchema = z.object({
@@ -176,19 +177,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-5 sm:px-10 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-300 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/25 font-extrabold text-xl">
-            <DollarSign className="w-6 h-6 stroke-[2.5]" />
-          </div>
-          <div>
-            <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">
-              FinTrack
-            </span>
-            <span className="ml-2 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              Pro Suite
-            </span>
-          </div>
-        </div>
+        <BrandLogo size="lg" clickable={false} />
 
         <div className="flex items-center gap-3">
           {/* Currency Switcher */}
