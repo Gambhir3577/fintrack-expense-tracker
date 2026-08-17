@@ -1,8 +1,8 @@
 {
-  "id": "com.fintrack.app",
-  "name": "FinTrack Pro — AI Financial & Expense Intelligence",
-  "short_name": "FinTrack",
-  "description": "Intelligent personal finance and expense tracker with receipt scanner, savings goals, split bills, and AI Copilot.",
+  "id": "com.aurix.app",
+  "name": "Aurix Pro — AI Wealth & Expense Intelligence",
+  "short_name": "Aurix",
+  "description": "Next-generation personal wealth and expense intelligence with receipt scanner, savings goals, split bills, and AI Copilot.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -43,14 +43,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "FinTrack Pro Desktop Dashboard"
+      "label": "Aurix Pro Desktop Dashboard"
     },
     {
       "src": "/screenshots/screenshot-mobile.png",
       "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "FinTrack Pro Mobile App"
+      "label": "Aurix Pro Mobile App"
     }
   ]
 }

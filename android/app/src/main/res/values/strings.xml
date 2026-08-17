@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">FinTrack Pro</string>
-    <string name="title_activity_main">FinTrack Pro</string>
-    <string name="package_name">com.fintrack.app</string>
-    <string name="custom_url_scheme">com.fintrack.app</string>
+    <string name="app_name">Aurix Pro</string>
+    <string name="title_activity_main">Aurix Pro</string>
+    <string name="package_name">com.aurix.app</string>
+    <string name="custom_url_scheme">com.aurix.app</string>
 </resources>

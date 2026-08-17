@@ -242,10 +242,10 @@ export const LoginPage: React.FC = () => {
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-300 flex items-center justify-center text-slate-950 font-black text-sm shadow-md">
-                      FT
+                      AX
                     </div>
                     <span className="text-xs font-extrabold uppercase tracking-widest text-slate-200">
-                      FinTrack Black
+                      Aurix Black
                     </span>
                   </div>
                   <Wifi className="w-5 h-5 text-slate-400 rotate-90" />
@@ -361,7 +361,7 @@ export const LoginPage: React.FC = () => {
               {/* Title */}
               <div className="mb-6">
                 <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-                  {mode === 'login' ? 'Welcome back to FinTrack' : 'Start your financial journey'}
+                  {mode === 'login' ? 'Welcome back to Aurix' : 'Start your financial journey'}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
                   {mode === 'login'
@@ -618,7 +618,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Footer */}
       <footer className="relative z-10 text-center p-4 text-xs text-slate-500 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto w-full px-6">
-        <span>© {new Date().getFullYear()} FinTrack Pro — Local-First Financial Intelligence.</span>
+        <span>© {new Date().getFullYear()} Aurix Pro — Next-Gen Wealth & Financial Intelligence.</span>
         <div className="flex items-center gap-4 mt-2 sm:mt-0 text-[11px] text-slate-400">
           <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-emerald-400" /> End-to-End Local Encryption</span>
           <span>•</span>

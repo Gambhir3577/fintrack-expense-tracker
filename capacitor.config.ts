@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.fintrack.app',
-  appName: 'FinTrack Pro',
+  appId: 'com.aurix.app',
+  appName: 'Aurix Pro',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

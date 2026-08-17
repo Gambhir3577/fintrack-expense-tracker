@@ -31,13 +31,13 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   const content = (
     <div className={`flex items-center gap-2.5 group ${className}`}>
       
-      {/* 🔮 Creative Quantum Nexus Prism SVG Emblem */}
+      {/* 🔮 Aurix Quantum Prism Emblem */}
       <div className={`relative ${iconDimensions} shrink-0 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3`}>
         
         {/* Ambient Glow Aura */}
         <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 rounded-xl blur-md opacity-40 group-hover:opacity-75 transition-opacity duration-300" />
         
-        {/* Crisp Vector Emblem */}
+        {/* Vector Emblem */}
         <svg
           viewBox="0 0 48 48"
           fill="none"
@@ -45,23 +45,18 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           className="relative w-full h-full drop-shadow-lg"
         >
           <defs>
-            <linearGradient id="ft-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="aurix-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#10B981" />
               <stop offset="50%" stopColor="#06B6D4" />
               <stop offset="100%" stopColor="#8B5CF6" />
             </linearGradient>
 
-            <linearGradient id="ft-grad-2" x1="100%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id="aurix-grad-2" x1="100%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#34D399" />
               <stop offset="100%" stopColor="#0EA5E9" />
             </linearGradient>
 
-            <linearGradient id="ft-inner" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#10B981" stopOpacity="0.4" />
-            </linearGradient>
-
-            <filter id="ft-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id="aurix-glow" x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="2" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
@@ -74,35 +69,32 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           <path d="M4 24H44M24 4V44" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
 
           {/* Isometric Diamond / Prism Facets */}
-          {/* Top Left Facet */}
           <path
             d="M24 8L38 18L24 26L10 18Z"
-            fill="url(#ft-grad-1)"
+            fill="url(#aurix-grad-1)"
             opacity="0.95"
           />
 
-          {/* Bottom Left Facet */}
           <path
             d="M10 18L24 26V40L10 32Z"
-            fill="url(#ft-grad-2)"
+            fill="url(#aurix-grad-2)"
             opacity="0.8"
           />
 
-          {/* Bottom Right Facet */}
           <path
             d="M38 18L24 26V40L38 32Z"
-            fill="url(#ft-grad-1)"
+            fill="url(#aurix-grad-1)"
             opacity="0.65"
           />
 
-          {/* Central Growth Wave / Dynamic Wealth Vector */}
+          {/* Central Apex Vector */}
           <path
             d="M16 23L22 19L27 24L33 16"
             stroke="#ffffff"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            filter="url(#ft-glow)"
+            filter="url(#aurix-glow)"
           />
 
           {/* Glowing Peak Vertex Pulse */}
@@ -115,7 +107,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5 leading-none">
           <span className={`font-extrabold tracking-tight text-white ${titleSizes} font-heading`}>
-            Fin<span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">Track</span>
+            Aur<span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">ix</span>
           </span>
           
           {showBadge && (
@@ -127,7 +119,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         
         {size === 'lg' || size === 'xl' ? (
           <span className="text-[11px] font-medium text-slate-400 tracking-tight mt-0.5">
-            AI-Powered Wealth & Expense Intelligence
+            Next-Gen Personal Wealth Intelligence
           </span>
         ) : null}
       </div>

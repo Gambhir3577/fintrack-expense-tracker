@@ -55,8 +55,8 @@ async function generate() {
     <rect width="1280" height="720" fill="#090D16"/>
     <circle cx="640" cy="360" r="300" fill="#10B981" fill-opacity="0.08" filter="blur(60px)"/>
     <circle cx="900" cy="200" r="250" fill="#06B6D4" fill-opacity="0.08" filter="blur(60px)"/>
-    <text x="640" y="320" font-family="sans-serif" font-weight="900" font-size="48" fill="#ffffff" text-anchor="middle">FinTrack Pro</text>
-    <text x="640" y="370" font-family="sans-serif" font-weight="600" font-size="24" fill="#34D399" text-anchor="middle">AI-Powered Wealth &amp; Expense Intelligence</text>
+    <text x="640" y="320" font-family="sans-serif" font-weight="900" font-size="48" fill="#ffffff" text-anchor="middle">Aurix Pro</text>
+    <text x="640" y="370" font-family="sans-serif" font-weight="600" font-size="24" fill="#34D399" text-anchor="middle">Next-Gen Personal Wealth Intelligence</text>
     <text x="640" y="420" font-family="sans-serif" font-weight="400" font-size="18" fill="#94A3B8" text-anchor="middle">Receipt Scanner • Savings Goals • Split-the-Bill • Live FX</text>
   </svg>`;
   await sharp(Buffer.from(desktopSvg))
@@ -68,8 +68,8 @@ async function generate() {
   <svg width="720" height="1280" viewBox="0 0 720 1280" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="720" height="1280" fill="#090D16"/>
     <circle cx="360" cy="640" r="280" fill="#10B981" fill-opacity="0.1" filter="blur(60px)"/>
-    <text x="360" y="580" font-family="sans-serif" font-weight="900" font-size="44" fill="#ffffff" text-anchor="middle">FinTrack Pro</text>
-    <text x="360" y="630" font-family="sans-serif" font-weight="600" font-size="22" fill="#34D399" text-anchor="middle">AI Financial Suite</text>
+    <text x="360" y="580" font-family="sans-serif" font-weight="900" font-size="44" fill="#ffffff" text-anchor="middle">Aurix Pro</text>
+    <text x="360" y="630" font-family="sans-serif" font-weight="600" font-size="22" fill="#34D399" text-anchor="middle">Wealth Intelligence Suite</text>
     <text x="360" y="680" font-family="sans-serif" font-weight="400" font-size="16" fill="#94A3B8" text-anchor="middle">100% Private Offline Vault</text>
   </svg>`;
   await sharp(Buffer.from(mobileSvg))
