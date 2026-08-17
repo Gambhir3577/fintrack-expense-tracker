@@ -1,18 +1,56 @@
 {
+  "id": "com.fintrack.app",
   "name": "FinTrack Pro — AI Financial & Expense Intelligence",
   "short_name": "FinTrack",
-  "description": "Next-generation personal finance and expense tracker with receipt scanner, savings goals, split bills, and AI Copilot.",
+  "description": "Intelligent personal finance and expense tracker with receipt scanner, savings goals, split bills, and AI Copilot.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#090D16",
   "theme_color": "#090D16",
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "FinTrack Pro Desktop Dashboard"
+    },
+    {
+      "src": "/screenshots/screenshot-mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "FinTrack Pro Mobile App"
     }
   ]
 }
