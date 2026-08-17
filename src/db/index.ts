@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { Transaction, Category, BudgetGoal, RecurrenceRule, UserSettings } from '../types';
+import { Transaction, Category, BudgetGoal, RecurrenceRule, UserSettings, SavingsGoal, SplitGroup } from '../types';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
 
 export interface CachedExchangeRates {
@@ -16,6 +16,8 @@ export class FinTrackDatabase extends Dexie {
   recurringRules!: Table<RecurrenceRule, string>;
   settings!: Table<UserSettings & { id: string }, string>;
   exchangeRates!: Table<CachedExchangeRates, string>;
+  savingsGoals!: Table<SavingsGoal, string>;
+  splitGroups!: Table<SplitGroup, string>;
 
   constructor() {
     super('FinTrackDB');
@@ -26,6 +28,17 @@ export class FinTrackDatabase extends Dexie {
       recurringRules: 'id, frequency, isActive, startDate',
       settings: 'id',
       exchangeRates: 'baseCurrency, timestamp',
+    });
+
+    this.version(2).stores({
+      transactions: 'id, date, type, categoryId, isRecurring, recurringRuleId, createdAt',
+      categories: 'id, name, type, isDefault',
+      budgets: 'id, categoryId, period',
+      recurringRules: 'id, frequency, isActive, startDate',
+      settings: 'id',
+      exchangeRates: 'baseCurrency, timestamp',
+      savingsGoals: 'id, targetDate, isCompleted, createdAt',
+      splitGroups: 'id, date, settled, createdAt',
     });
   }
 }

@@ -9,6 +9,9 @@ import { CSVImportPage } from './features/import/CSVImportPage';
 import { CategoriesPage } from './features/categories/CategoriesPage';
 import { SettingsPage } from './features/settings/SettingsPage';
 import { AIAssistantPage } from './features/ai/AIAssistantPage';
+import { ReceiptScannerPage } from './features/scanner/ReceiptScannerPage';
+import { SavingsGoalsPage } from './features/goals/SavingsGoalsPage';
+import { SplitBillPage } from './features/split/SplitBillPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { AuthGuard } from './features/auth/AuthGuard';
 import { useAuthStore } from './store/useAuthStore';
@@ -38,6 +41,9 @@ export function App() {
           <Route index element={<DashboardPage />} />
           <Route path="ai-assistant" element={<AIAssistantPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="receipt-scanner" element={<ReceiptScannerPage />} />
+          <Route path="goals" element={<SavingsGoalsPage />} />
+          <Route path="split-bill" element={<SplitBillPage />} />
           <Route path="budgets" element={<BudgetsPage />} />
           <Route path="recurring" element={<RecurringPage />} />
           <Route path="import" element={<CSVImportPage />} />

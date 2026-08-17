@@ -98,10 +98,65 @@ export interface CSVParsedRow {
     categoryId: string;
     notes?: string;
   };
-  isDuplicate: boolean;
+  isDuplicate?: boolean;
   isValid: boolean;
   validationError?: string;
   includeInImport: boolean;
+}
+
+export interface SavingsGoal {
+  id: string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string; // ISO string 'YYYY-MM-DD'
+  icon: string;
+  color: string;
+  categoryId?: string;
+  isCompleted: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SplitMember {
+  id: string;
+  name: string;
+  upiId?: string;
+  avatarUrl?: string;
+}
+
+export interface SplitDetail {
+  memberId: string;
+  amount: number;
+  percentage?: number;
+}
+
+export interface SplitGroup {
+  id: string;
+  title: string;
+  totalAmount: number;
+  currency: SupportedCurrency;
+  paidByMemberId: string;
+  members: SplitMember[];
+  splits: SplitDetail[];
+  settled: boolean;
+  date: string;
+  notes?: string;
+  categoryId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReceiptScanResult {
+  merchant: string;
+  amount: number;
+  date: string;
+  tax?: number;
+  categoryId: string;
+  categoryName: string;
+  confidence: number;
+  rawText?: string;
 }
 
 export interface CategorySpendingSummary {

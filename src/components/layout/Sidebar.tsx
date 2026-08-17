@@ -11,6 +11,9 @@ import {
   Sparkles,
   X,
   LogOut,
+  Users,
+  Camera,
+  PiggyBank,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { loadDemoData } from '../../db/seedData';
@@ -41,7 +44,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/transactions', label: 'Transactions', icon: Receipt },
-    { to: '/budgets', label: 'Budget Goals', icon: Target },
+    { to: '/receipt-scanner', label: 'Receipt Scanner', icon: Camera },
+    { to: '/goals', label: 'Savings Goals', icon: PiggyBank },
+    { to: '/split-bill', label: 'Split Bills', icon: Users },
+    { to: '/budgets', label: 'Budget Limits', icon: Target },
     { to: '/recurring', label: 'Recurring Rules', icon: Repeat },
     { to: '/import', label: 'Import CSV', icon: UploadCloud },
     { to: '/categories', label: 'Categories', icon: Tags },
