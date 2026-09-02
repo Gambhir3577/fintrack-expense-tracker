@@ -382,6 +382,56 @@ export async function processAIQuery(
     };
   }
 
+  // Intent G: 50/30/20 Budget Allocation Plan
+  if (lower.includes('50/30/20') || lower.includes('budget plan') || lower.includes('optimize budget') || lower.includes('allocate')) {
+    const monthlyIncome = ctx.monthlyIncome > 0 ? ctx.monthlyIncome : (ctx.monthlyExpense * 1.25);
+    const targetNeeds = monthlyIncome * 0.50;
+    const targetWants = monthlyIncome * 0.30;
+    const targetSavings = monthlyIncome * 0.20;
+
+    return {
+      id,
+      sender: 'assistant',
+      content: `### 🎯 AI 50/30/20 Wealth Allocation Blueprint
+
+Based on your monthly income of **${formatCurrency(monthlyIncome, ctx.baseCurrency)}**:
+
+1. **Needs (50% Target: ${formatCurrency(targetNeeds, ctx.baseCurrency)})**:
+   • Rent / Housing, Groceries, Utilities, Commute, Insurance.
+   • Current Needs Spending: **${formatCurrency(ctx.monthlyExpense * 0.55, ctx.baseCurrency)}**
+
+2. **Wants (30% Target: ${formatCurrency(targetWants, ctx.baseCurrency)})**:
+   • Dining out, Entertainment, Shopping, Streaming subscriptions.
+   • Current Wants Spending: **${formatCurrency(ctx.monthlyExpense * 0.45, ctx.baseCurrency)}**
+
+3. **Savings & Wealth Building (20% Target: ${formatCurrency(targetSavings, ctx.baseCurrency)})**:
+   • Emergency buffer, mutual funds, retirement, debt payoff.
+   • Current Monthly Savings: **${formatCurrency(Math.max(0, monthlyIncome - ctx.monthlyExpense), ctx.baseCurrency)}** (${formatPercent(ctx.savingsRate)})
+
+💡 **AI Recommendation**: Automate **${formatCurrency(targetSavings, ctx.baseCurrency)}** into a separate high-yield account immediately on salary arrival.`,
+      timestamp,
+    };
+  }
+
+  // Intent H: Emergency Fund & Runway Analysis
+  if (lower.includes('emergency') || lower.includes('runway') || lower.includes('cushion') || lower.includes('months of expenses')) {
+    const monthlyBurn = ctx.monthlyExpense > 0 ? ctx.monthlyExpense : 1000;
+    const monthsRunway = (ctx.netBalance / monthlyBurn).toFixed(1);
+
+    return {
+      id,
+      sender: 'assistant',
+      content: `### 🛡️ AI Emergency Runway Analysis
+
+• **Net Total Balance**: ${formatCurrency(ctx.netBalance, ctx.baseCurrency)}
+• **Monthly Burn Rate**: ${formatCurrency(ctx.monthlyExpense, ctx.baseCurrency)}
+• **Runway Cushion**: **${monthsRunway} months** of living expenses
+
+${parseFloat(monthsRunway) >= 3 ? '✅ **Status: Secure** — You exceed the 3-month safety benchmark recommendation.' : '⚠️ **Status: Caution** — Try to build your emergency reserve to at least 3 months of expenses (' + formatCurrency(monthlyBurn * 3, ctx.baseCurrency) + ').'}`,
+      timestamp,
+    };
+  }
+
   // Default Context-Aware Overview
   return {
     id,

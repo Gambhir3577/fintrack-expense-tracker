@@ -16,6 +16,11 @@ import { useSettingsStore } from '../../store/useSettingsStore';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import { calculateMonthlyCategorySpending, calculateMonthlyBudgetOverview, calculateSavingsRate } from '../../utils/budgetCalculations';
+import { useRecurringStore } from '../../store/useRecurringStore';
+import { FinancialContext } from '../../lib/aiService';
+import { differenceInDays, endOfMonth } from 'date-fns';
+import { DashboardAICommandBar } from './components/DashboardAICommandBar';
+import { AIInsightsWidget } from './components/AIInsightsWidget';
 import { StatCard } from '../../components/common/StatCard';
 import { CashFlowTrendChart } from './components/CashFlowTrendChart';
 import { ExpenseCategoryDonutChart } from './components/ExpenseCategoryDonutChart';
@@ -116,6 +121,73 @@ export const DashboardPage: React.FC = () => {
     return { spendingSummaries: summaries, budgetOverview: overview };
   }, [convertedTransactions, categories, convertedBudgets, currentMonthStr]);
 
+  const { rules } = useRecurringStore();
+
+  const financialContext: FinancialContext = useMemo(() => {
+    const daysRemaining = differenceInDays(endOfMonth(now), now);
+
+    const catSpendMap = new Map<string, number>();
+    transactions.forEach((tx) => {
+      const isCurrentMonth = tx.date.startsWith(currentMonthStr);
+      if (tx.type === 'expense' && isCurrentMonth) {
+        const converted = convert(tx.amount);
+        catSpendMap.set(tx.categoryId, (catSpendMap.get(tx.categoryId) || 0) + converted);
+      }
+    });
+
+    const topExpenseCategories = Array.from(catSpendMap.entries())
+      .map(([catId, amount]) => {
+        const cat = categories.find((c) => c.id === catId) || {
+          id: catId,
+          name: 'Other',
+          icon: 'Tag',
+          color: '#64748B',
+          type: 'expense' as const,
+        };
+        return {
+          category: cat,
+          amount,
+          percentage: metrics.currentMonthExpense > 0 ? (amount / metrics.currentMonthExpense) * 100 : 0,
+        };
+      })
+      .sort((a, b) => b.amount - a.amount);
+
+    const overBudgetCategories: Array<{ category: any; spent: number; limit: number; excess: number }> = [];
+    topExpenseCategories.forEach(({ category, amount }) => {
+      const goal = budgets.find((b) => b.categoryId === category.id && b.period === currentMonthStr);
+      const limit = goal ? convert(goal.monthlyLimit) : (category.budgetLimit ? convert(category.budgetLimit) : 0);
+      if (limit > 0 && amount > limit) {
+        overBudgetCategories.push({
+          category,
+          spent: amount,
+          limit,
+          excess: amount - limit,
+        });
+      }
+    });
+
+    const upcomingRecurring = rules
+      .filter((r) => r.isActive)
+      .map((r) => ({
+        rule: r,
+        category: categories.find((c) => c.id === r.template.categoryId),
+      }));
+
+    return {
+      netBalance: metrics.netBalance,
+      monthlyIncome: metrics.currentMonthIncome,
+      monthlyExpense: metrics.currentMonthExpense,
+      savingsRate: metrics.savingsRate,
+      baseCurrency,
+      topExpenseCategories,
+      overBudgetCategories,
+      upcomingRecurring,
+      daysRemainingInMonth: Math.max(0, daysRemaining),
+      recentTransactions: transactions.slice(0, 10),
+      categories,
+    };
+  }, [transactions, categories, budgets, rules, metrics, baseCurrency, convert, currentMonthStr, now]);
+
   const handleLoadDemo = async () => {
     try {
       await loadDemoData();
@@ -173,6 +245,9 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Flagship AI Command Bar */}
+      <DashboardAICommandBar />
+
       {/* 4 KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
@@ -224,6 +299,9 @@ export const DashboardPage: React.FC = () => {
           iconBgColor="bg-cyan-500/10 border-cyan-500/20"
         />
       </div>
+
+      {/* Autonomous AI Insights & Anomaly Alert Hub */}
+      <AIInsightsWidget financialContext={financialContext} />
 
       {/* Top Charts Row: Cash Flow Trend (2 cols) + Category Donut (1 col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

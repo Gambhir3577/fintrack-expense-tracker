@@ -28,6 +28,7 @@ import { TransactionFormModal } from './TransactionFormModal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { EmptyState } from '../../components/common/EmptyState';
 import { loadDemoData } from '../../db/seedData';
+import { AITransactionQuickInput } from './components/AITransactionQuickInput';
 
 export const TransactionsPage: React.FC = () => {
   const {
@@ -190,6 +191,9 @@ export const TransactionsPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* AI Magic Quick Entry */}
+      <AITransactionQuickInput />
 
       {/* Filter & Search Bar */}
       <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-4 space-y-3">
