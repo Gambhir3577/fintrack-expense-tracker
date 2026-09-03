@@ -16,6 +16,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 import { AIFloatingButton } from '../ai/AIFloatingButton';
 import { AIChatDrawer } from '../ai/AIChatDrawer';
+import { AmbientBackground } from '../common/AmbientBackground';
 
 export const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -60,6 +61,8 @@ export const AppLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen aurora-bg text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-x-hidden">
+      <AmbientBackground />
+
       <Navbar
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

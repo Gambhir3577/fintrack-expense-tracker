@@ -7,6 +7,7 @@ import { useCurrencyStore } from '../../../store/currencyStore';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 import { parseNaturalLanguageTransaction, ParsedTransactionDraft } from '../../../lib/aiService';
 import { formatCurrency } from '../../../utils/formatters';
+import { AIWaveform } from '../../../components/common/AIWaveform';
 import confetti from 'canvas-confetti';
 
 export const DashboardAICommandBar: React.FC = () => {
@@ -16,7 +17,7 @@ export const DashboardAICommandBar: React.FC = () => {
   const { addTransaction } = useTransactionStore();
   const { baseCurrency } = useCurrencyStore();
   const { showToast } = useSettingsStore();
-  const { toggleOpen } = useAIStore();
+  const { toggleOpen, isThinking } = useAIStore();
 
   const handleInputChange = (val: string) => {
     setQuery(val);
@@ -83,16 +84,14 @@ export const DashboardAICommandBar: React.FC = () => {
 
       <div className="relative z-10 flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-400">
-              <Sparkles className="w-4 h-4" />
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 shadow-sm">
+              <Sparkles className="w-4 h-4 animate-spin-slow" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 FinTrack AI Financial Intelligence
-                <span className="text-[10px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-gradient-to-r from-indigo-500 to-emerald-400 text-slate-950">
-                  Live
-                </span>
+                <AIWaveform isActive={true} />
               </h2>
               <p className="text-xs text-slate-400">
                 Type natural language transactions or ask AI for financial advice
@@ -102,7 +101,7 @@ export const DashboardAICommandBar: React.FC = () => {
 
           <button
             onClick={toggleOpen}
-            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 transition-all"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 transition-all cursor-pointer"
           >
             <Bot className="w-3.5 h-3.5 text-indigo-400" />
             <span>Open AI Copilot</span>

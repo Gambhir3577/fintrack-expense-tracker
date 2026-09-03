@@ -21,12 +21,14 @@ import { FinancialContext } from '../../lib/aiService';
 import { differenceInDays, endOfMonth } from 'date-fns';
 import { DashboardAICommandBar } from './components/DashboardAICommandBar';
 import { AIInsightsWidget } from './components/AIInsightsWidget';
+import { FinancialMilestoneWidget } from './components/FinancialMilestoneWidget';
 import { StatCard } from '../../components/common/StatCard';
 import { CashFlowTrendChart } from './components/CashFlowTrendChart';
 import { ExpenseCategoryDonutChart } from './components/ExpenseCategoryDonutChart';
 import { MonthlyComparisonBarChart } from './components/MonthlyComparisonBarChart';
 import { RecentTransactionsWidget } from './components/RecentTransactionsWidget';
 import { BudgetHealthWidget } from './components/BudgetHealthWidget';
+import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { TransactionFormModal } from '../transactions/TransactionFormModal';
 import { loadDemoData } from '../../db/seedData';
 import { useNavigate } from 'react-router-dom';
@@ -199,6 +201,8 @@ export const DashboardPage: React.FC = () => {
     }
   };
 
+  const currencySymbol = CURRENCY_CONFIGS[baseCurrency]?.symbol || '$';
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
       {/* Top Banner / Welcome & Quick Actions */}
@@ -220,7 +224,7 @@ export const DashboardPage: React.FC = () => {
           {transactions.length === 0 && (
             <button
               onClick={handleLoadDemo}
-              className="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 transition-all shadow-sm"
+              className="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 transition-all shadow-sm cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-purple-400" />
               Load Demo Data
@@ -229,7 +233,7 @@ export const DashboardPage: React.FC = () => {
 
           <button
             onClick={() => navigate('/import')}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-all"
+            className="flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-all cursor-pointer"
           >
             <UploadCloud className="w-4 h-4 text-slate-400" />
             Import CSV
@@ -237,7 +241,7 @@ export const DashboardPage: React.FC = () => {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 shadow-md shadow-emerald-500/20 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             New Transaction
@@ -246,13 +250,17 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Flagship AI Command Bar */}
-      <DashboardAICommandBar />
+      <div className="animate-slide-up delay-1">
+        <DashboardAICommandBar />
+      </div>
 
-      {/* 4 KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* 4 KPI Summary Cards with Animated Number Counters */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-slide-up delay-2">
         <StatCard
           title="Total Net Balance"
           value={formatCurrency(metrics.netBalance, baseCurrency)}
+          rawNumericValue={metrics.netBalance}
+          currencyPrefix={currencySymbol}
           subtitle={`Converted to ${baseCurrency}`}
           icon={Wallet}
           iconColor="text-emerald-400"
@@ -263,6 +271,8 @@ export const DashboardPage: React.FC = () => {
         <StatCard
           title="Monthly Income"
           value={formatCurrency(metrics.currentMonthIncome, baseCurrency)}
+          rawNumericValue={metrics.currentMonthIncome}
+          currencyPrefix={currencySymbol}
           trend={{
             value: metrics.incomeTrend,
             label: 'vs last month',
@@ -276,6 +286,8 @@ export const DashboardPage: React.FC = () => {
         <StatCard
           title="Monthly Expenses"
           value={formatCurrency(metrics.currentMonthExpense, baseCurrency)}
+          rawNumericValue={metrics.currentMonthExpense}
+          currencyPrefix={currencySymbol}
           trend={{
             value: metrics.expenseTrend,
             label: 'vs last month',
@@ -300,11 +312,21 @@ export const DashboardPage: React.FC = () => {
         />
       </div>
 
+      {/* Interactive Financial Milestone & XP Streak Widget */}
+      <div className="animate-slide-up delay-3">
+        <FinancialMilestoneWidget
+          financialContext={financialContext}
+          transactionCount={transactions.length}
+        />
+      </div>
+
       {/* Autonomous AI Insights & Anomaly Alert Hub */}
-      <AIInsightsWidget financialContext={financialContext} />
+      <div className="animate-slide-up delay-4">
+        <AIInsightsWidget financialContext={financialContext} />
+      </div>
 
       {/* Top Charts Row: Cash Flow Trend (2 cols) + Category Donut (1 col) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up delay-5">
         <div className="lg:col-span-2">
           <CashFlowTrendChart transactions={convertedTransactions} />
         </div>
