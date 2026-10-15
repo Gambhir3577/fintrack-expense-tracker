@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { SavingsGoal } from '../types';
 import { db } from '../db';
+import { syncManager } from '../lib/syncManager';
 import confetti from 'canvas-confetti';
 
 interface SavingsGoalState {
@@ -87,6 +88,7 @@ export const useSavingsGoalStore = create<SavingsGoalState>((set, get) => ({
 
     await db.savingsGoals.put(newGoal);
     set((state) => ({ goals: [newGoal, ...state.goals] }));
+    syncManager.scheduleSync();
     return newGoal;
   },
 
@@ -109,6 +111,7 @@ export const useSavingsGoalStore = create<SavingsGoalState>((set, get) => ({
     set((state) => ({
       goals: state.goals.map((g) => (g.id === id ? updated : g)),
     }));
+    syncManager.scheduleSync();
   },
 
   deleteGoal: async (id) => {
@@ -116,6 +119,7 @@ export const useSavingsGoalStore = create<SavingsGoalState>((set, get) => ({
     set((state) => ({
       goals: state.goals.filter((g) => g.id !== id),
     }));
+    syncManager.scheduleSync();
   },
 
   contributeToGoal: async (id, deltaAmount) => {

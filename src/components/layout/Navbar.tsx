@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User, RefreshCw, Bot } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Sun, Moon, DollarSign, Menu, LogOut, User, RefreshCw, Bot, Cloud, CloudOff } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { useAIStore } from '../../store/useAIStore';
+import { syncManager, SyncStatus } from '../../lib/syncManager';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +25,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { baseCurrency, setBaseCurrency, isLoading: isCurrencyLoading, isFallback } = useCurrencyStore();
   const { toggleOpen: toggleAIOpen } = useAIStore();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncManager.getStatus());
+
+  useEffect(() => {
+    return syncManager.subscribe((status) => {
+      setSyncStatus(status);
+    });
+  }, []);
 
   const handleThemeToggle = () => {
     const nextTheme = settings.theme === 'dark' ? 'light' : 'dark';
@@ -76,6 +84,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
         </div>
+
+        {/* Cloud Sync Status Indicator */}
+        <button
+          onClick={() => syncManager.fullSync()}
+          title={`Cloud Sync: ${syncStatus.toUpperCase()} (Click to sync now)`}
+          className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white transition-colors focus:outline-none flex items-center justify-center relative"
+        >
+          {syncStatus === 'syncing' ? (
+            <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
+          ) : syncStatus === 'synced' ? (
+            <Cloud className="w-4 h-4 text-emerald-400" />
+          ) : syncStatus === 'offline' ? (
+            <CloudOff className="w-4 h-4 text-slate-500" />
+          ) : syncStatus === 'error' ? (
+            <Cloud className="w-4 h-4 text-rose-400" />
+          ) : (
+            <Cloud className="w-4 h-4 text-slate-400" />
+          )}
+          {syncStatus === 'synced' && (
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-slate-950" />
+          )}
+        </button>
 
         {/* Theme Switcher */}
         <button

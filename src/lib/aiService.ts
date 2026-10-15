@@ -1,6 +1,7 @@
 import { Transaction, Category, BudgetGoal, RecurrenceRule, SupportedCurrency } from '../types';
 import { formatCurrency, formatPercent, formatDateString } from '../utils/formatters';
 import { format, subDays, startOfMonth, endOfMonth, differenceInDays } from 'date-fns';
+import { api } from './api';
 
 export interface FinancialContext {
   netBalance: number;
@@ -259,18 +260,30 @@ export async function processAIQuery(
   const timestamp = new Date().toISOString();
   const id = `msg-${Date.now()}`;
 
-  // 1. If remote Gemini or OpenAI API key is provided and user enabled remote mode
-  if (keyConfig && keyConfig.provider !== 'local' && keyConfig.apiKey) {
+  // 1. If remote Gemini cloud mode is enabled, proxy request securely through backend
+  if (keyConfig && keyConfig.provider !== 'local') {
     try {
-      const responseText = await callRemoteLLM(query, ctx, keyConfig);
-      return {
-        id,
-        sender: 'assistant',
-        content: responseText,
-        timestamp,
-      };
+      const res = await api.ai.askAdvisor(query, {
+        baseCurrency: ctx.baseCurrency,
+        netBalance: ctx.netBalance,
+        monthlyIncome: ctx.monthlyIncome,
+        monthlyExpense: ctx.monthlyExpense,
+        savingsRate: ctx.savingsRate,
+        topExpenseCategories: ctx.topExpenseCategories,
+        overBudgetCategories: ctx.overBudgetCategories,
+        daysRemainingInMonth: ctx.daysRemainingInMonth,
+      });
+
+      if (res && res.response) {
+        return {
+          id,
+          sender: 'assistant',
+          content: res.response,
+          timestamp,
+        };
+      }
     } catch (err) {
-      console.warn('Remote LLM failed, falling back to local intelligence engine:', err);
+      console.warn('Backend Gemini AI proxy failed or offline, falling back to local engine:', err);
     }
   }
 

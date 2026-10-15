@@ -27,7 +27,11 @@ import {
   Bot,
   Zap,
   Key,
+  Cloud,
+  CloudOff,
+  Wifi,
 } from 'lucide-react';
+import { syncManager, SyncStatus } from '../../lib/syncManager';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useTransactionStore } from '../../store/useTransactionStore';
@@ -83,7 +87,7 @@ export const SettingsPage: React.FC = () => {
   const avatarUploadRef = useRef<HTMLInputElement>(null);
 
   const { settings, setTheme, showToast } = useSettingsStore();
-  const { user, updateProfile } = useAuthStore();
+  const { user, updateProfile, isCloudUser } = useAuthStore();
   const { transactions, loadTransactions } = useTransactionStore();
   const { categories, loadCategories } = useCategoryStore();
   const { loadBudgets } = useBudgetStore();
@@ -102,6 +106,33 @@ export const SettingsPage: React.FC = () => {
 
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [isDemoConfirmOpen, setIsDemoConfirmOpen] = useState(false);
+
+  // Cloud Sync state
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncManager.getStatus());
+  const [lastSyncedTime, setLastSyncedTime] = useState<string | null>(syncManager.getLastSyncedAt());
+  const [isCloudSyncEnabled, setIsCloudSyncEnabled] = useState<boolean>(syncManager.isSyncEnabled());
+  const [isSyncingNow, setIsSyncingNow] = useState(false);
+
+  useEffect(() => {
+    return syncManager.subscribe((status, lastSynced) => {
+      setSyncStatus(status);
+      setLastSyncedTime(lastSynced);
+      setIsCloudSyncEnabled(syncManager.isSyncEnabled());
+    });
+  }, []);
+
+  const handleToggleCloudSync = (enabled: boolean) => {
+    setIsCloudSyncEnabled(enabled);
+    syncManager.setCloudSyncEnabled(enabled);
+    showToast(enabled ? 'Cloud sync enabled' : 'Cloud sync paused', 'info');
+  };
+
+  const handleManualSync = async () => {
+    setIsSyncingNow(true);
+    await syncManager.fullSync();
+    setIsSyncingNow(false);
+    showToast('Synchronization completed', 'success');
+  };
 
   // Profile editing state
   const [nameInput, setNameInput] = useState(user?.name || '');
@@ -547,6 +578,109 @@ export const SettingsPage: React.FC = () => {
         )}
       </div>
 
+      {/* ☁️ Cloud Synchronization & Multi-Device Sync */}
+      <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-6 space-y-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Cloud className="w-5 h-5 text-emerald-400" />
+              Cloud Synchronization & Multi-Device Sync
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Automatically sync your local IndexedDB vault to secure PostgreSQL cloud storage. Offline-first: changes sync automatically when back online.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border ${
+                syncStatus === 'synced'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  : syncStatus === 'syncing'
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  : syncStatus === 'offline'
+                  ? 'bg-slate-800 text-slate-400 border-slate-700'
+                  : syncStatus === 'error'
+                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                  : 'bg-slate-800/80 text-slate-400 border-slate-700'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  syncStatus === 'synced'
+                    ? 'bg-emerald-400'
+                    : syncStatus === 'syncing'
+                    ? 'bg-amber-400 animate-ping'
+                    : syncStatus === 'offline'
+                    ? 'bg-slate-500'
+                    : syncStatus === 'error'
+                    ? 'bg-rose-400'
+                    : 'bg-slate-500'
+                }`}
+              />
+              {syncStatus === 'synced'
+                ? 'Synced with Cloud'
+                : syncStatus === 'syncing'
+                ? 'Syncing...'
+                : syncStatus === 'offline'
+                ? 'Offline'
+                : syncStatus === 'error'
+                ? 'Sync Failed'
+                : 'Local Only'}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 font-bold text-sm text-white">
+              <span>Automatic Background Sync</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">
+                Last-Write-Wins
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              {lastSyncedTime
+                ? `Last synced: ${format(new Date(lastSyncedTime), 'MMM d, yyyy HH:mm:ss')}`
+                : 'No sync recorded yet'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleManualSync}
+              disabled={isSyncingNow || !isCloudSyncEnabled}
+              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-xs font-semibold text-slate-200 hover:text-white transition-all flex items-center gap-2 disabled:opacity-40"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingNow ? 'animate-spin text-emerald-400' : ''}`} />
+              <span>{isSyncingNow ? 'Syncing...' : 'Sync Now'}</span>
+            </button>
+
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isCloudSyncEnabled}
+                onChange={(e) => handleToggleCloudSync(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+          </div>
+        </div>
+
+        {!isCloudUser && (
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+            <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-xs space-y-1">
+              <span className="font-bold text-amber-300">Local Guest Mode Active</span>
+              <p className="text-slate-400">
+                You are running FinTrack in local-only mode. All transactions remain safe in your browser's IndexedDB. Sign in or register to enable cloud sync across multiple browsers and your Android app.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* 🤖 AI Financial Copilot & Intelligence Engine Configuration */}
       <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-6 space-y-6 shadow-xl">
         <div className="flex items-center justify-between">
@@ -560,11 +694,11 @@ export const SettingsPage: React.FC = () => {
             </p>
           </div>
           <span className="text-[10px] uppercase font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-            {keyConfig.provider === 'local' ? 'Offline Private' : `${keyConfig.provider.toUpperCase()} Cloud`}
+            {keyConfig.provider === 'local' ? 'Offline Private' : 'Gemini Cloud Proxy'}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           {/* Option 1: Local Neural Rules */}
           <button
@@ -579,18 +713,18 @@ export const SettingsPage: React.FC = () => {
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-white">Local Rule Engine</span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                Recommended
+                100% Offline
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              100% offline & private. Zero latency, no API key needed. Runs directly on your device.
+              Zero latency, runs directly on your device. Never requires internet or API keys.
             </p>
             {keyConfig.provider === 'local' && (
               <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             )}
           </button>
 
-          {/* Option 2: Google Gemini */}
+          {/* Option 2: Google Gemini via Backend Proxy */}
           <button
             type="button"
             onClick={() => setKeyConfig({ provider: 'gemini' })}
@@ -601,59 +735,26 @@ export const SettingsPage: React.FC = () => {
             }`}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-white">Google Gemini</span>
+              <span className="text-xs font-bold text-white">Google Gemini 1.5 Flash</span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">
-                1.5 Flash
+                Server Proxy
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              Fast, powerful reasoning for complex queries and budgeting strategies.
+              Proxied securely through your FinTrack backend. High reasoning capability with zero client-side key exposure.
             </p>
-          </button>
-
-          {/* Option 3: OpenAI */}
-          <button
-            type="button"
-            onClick={() => setKeyConfig({ provider: 'openai' })}
-            className={`p-4 rounded-xl border text-left transition-all relative ${
-              keyConfig.provider === 'openai'
-                ? 'bg-purple-500/10 border-purple-500/50 shadow-md shadow-purple-500/10'
-                : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-white">OpenAI GPT</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">
-                4o-mini
-              </span>
-            </div>
-            <p className="text-xs text-slate-400">
-              Advanced natural language financial advisory with personalized planning.
-            </p>
+            {keyConfig.provider === 'gemini' && (
+              <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            )}
           </button>
         </div>
 
-        {/* API Key Input if cloud provider chosen */}
-        {keyConfig.provider !== 'local' && (
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 animate-fade-in">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-              {keyConfig.provider === 'gemini' ? 'Google AI Studio Gemini API Key' : 'OpenAI API Key'}
-            </label>
-            <div className="relative">
-              <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="password"
-                value={keyConfig.apiKey || ''}
-                onChange={(e) => setKeyConfig({ apiKey: e.target.value.trim() })}
-                placeholder={keyConfig.provider === 'gemini' ? 'AIzaSy...' : 'sk-proj-...'}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none font-mono"
-              />
-            </div>
-            <p className="text-[11px] text-slate-400">
-              🔒 Your API key is stored securely in local browser storage only and is never transmitted to any central servers.
-            </p>
-          </div>
-        )}
+        <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-3">
+          <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
+          <p className="text-xs text-slate-400">
+            🔒 <strong className="text-slate-300">Privacy First:</strong> Gemini API keys are maintained exclusively on the backend server. The browser client never touches or stores API secrets.
+          </p>
+        </div>
       </div>
 
       {/* Data Export & Backup Management */}

@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  refreshTokens   RefreshToken[]
+  transactions    Transaction[]
+  categories      Category[]
+  budgets         BudgetGoal[]
+  recurringRules  RecurrenceRule[]
+  savingsGoals    SavingsGoal[]
+  splitGroups     SplitGroup[]
+  settings        UserSetting?
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Transaction {
+  id              String    @id
+  userId          String
+  date            String
+  description     String
+  amount          Decimal   @db.Decimal(14, 2)
+  type            String
+  categoryId      String
+  isRecurring     Boolean   @default(false)
+  recurringRuleId String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([userId, date])
+}
+
+model Category {
+  id          String    @id
+  userId      String
+  name        String
+  icon        String
+  color       String
+  type        String
+  budgetLimit Decimal?  @db.Decimal(14, 2)
+  isDefault   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model BudgetGoal {
+  id              String    @id
+  userId          String
+  categoryId      String
+  monthlyLimit    Decimal   @db.Decimal(14, 2)
+  period          String
+  notifyThreshold Float?    @default(0.8)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([userId, period])
+}
+
+model RecurrenceRule {
+  id                String    @id
+  userId            String
+  frequency         String
+  startDate         String
+  endDate           String?
+  lastGeneratedDate String?
+  isActive          Boolean   @default(true)
+  template          Json
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model SavingsGoal {
+  id            String    @id
+  userId        String
+  title         String
+  targetAmount  Decimal   @db.Decimal(14, 2)
+  currentAmount Decimal   @db.Decimal(14, 2)
+  targetDate    String
+  icon          String
+  color         String
+  categoryId    String?
+  isCompleted   Boolean   @default(false)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model SplitGroup {
+  id             String    @id
+  userId         String
+  title          String
+  totalAmount    Decimal   @db.Decimal(14, 2)
+  currency       String    @default("INR")
+  paidByMemberId String
+  members        Json
+  splits         Json
+  settled        Boolean   @default(false)
+  date           String
+  notes          String?
+  categoryId     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model UserSetting {
+  id                     String    @id @default(uuid())
+  userId                 String    @unique
+  currency               String    @default("INR")
+  theme                  String    @default("dark")
+  dateFormat             String    @default("YYYY-MM-DD")
+  firstDayOfWeek         Int       @default(1)
+  hasCompletedOnboarding Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  deletedAt              DateTime?
+
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Category } from '../types';
 import { db } from '../db';
+import { syncManager } from '../lib/syncManager';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
 
 interface CategoryState {
@@ -40,6 +41,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     };
     await db.categories.put(newCategory);
     set((state) => ({ categories: [...state.categories, newCategory] }));
+    syncManager.scheduleSync();
     return newCategory;
   },
 
@@ -48,6 +50,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     set((state) => ({
       categories: state.categories.map((c) => (c.id === category.id ? category : c)),
     }));
+    syncManager.scheduleSync();
   },
 
   deleteCategory: async (id) => {
@@ -55,6 +58,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     set((state) => ({
       categories: state.categories.filter((c) => c.id !== id),
     }));
+    syncManager.scheduleSync();
   },
 
   getCategoryById: (id: string) => {

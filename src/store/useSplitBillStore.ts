@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { SplitGroup, SplitMember, SplitDetail, SupportedCurrency } from '../types';
 import { db } from '../db';
+import { syncManager } from '../lib/syncManager';
 import confetti from 'canvas-confetti';
 
 export interface SettlementDebt {
@@ -102,6 +103,7 @@ export const useSplitBillStore = create<SplitBillState>((set, get) => ({
 
     await db.splitGroups.put(newGroup);
     set((state) => ({ groups: [newGroup, ...state.groups] }));
+    syncManager.scheduleSync();
     return newGroup;
   },
 
@@ -120,6 +122,7 @@ export const useSplitBillStore = create<SplitBillState>((set, get) => ({
     set((state) => ({
       groups: state.groups.map((g) => (g.id === id ? updated : g)),
     }));
+    syncManager.scheduleSync();
   },
 
   deleteGroup: async (id) => {
@@ -127,6 +130,7 @@ export const useSplitBillStore = create<SplitBillState>((set, get) => ({
     set((state) => ({
       groups: state.groups.filter((g) => g.id !== id),
     }));
+    syncManager.scheduleSync();
   },
 
   toggleSettle: async (id, settled) => {
@@ -138,6 +142,7 @@ export const useSplitBillStore = create<SplitBillState>((set, get) => ({
         origin: { y: 0.7 },
       });
     }
+    syncManager.scheduleSync();
   },
 
   calculateSettlements: (group: SplitGroup): SettlementDebt[] => {

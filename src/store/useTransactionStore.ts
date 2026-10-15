@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Transaction, TransactionType } from '../types';
 import { db } from '../db';
+import { syncManager } from '../lib/syncManager';
 import { startOfMonth, endOfMonth, subMonths, format, parseISO, isWithinInterval } from 'date-fns';
 
 export type DateRangePreset = 'all' | 'this-month' | 'last-month' | 'last-90-days' | 'this-year' | 'custom';
@@ -86,6 +87,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)
       ),
     }));
+    syncManager.scheduleSync();
     return newTx;
   },
 
@@ -98,6 +100,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     set((state) => ({
       transactions: state.transactions.map((t) => (t.id === tx.id ? updated : t)),
     }));
+    syncManager.scheduleSync();
   },
 
   deleteTransaction: async (id) => {
@@ -105,6 +108,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     set((state) => ({
       transactions: state.transactions.filter((t) => t.id !== id),
     }));
+    syncManager.scheduleSync();
   },
 
   bulkAddTransactions: async (txList) => {
@@ -117,6 +121,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     }));
     await db.transactions.bulkPut(newItems);
     await get().loadTransactions();
+    syncManager.scheduleSync();
     return newItems.length;
   },
 
@@ -125,6 +130,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     set((state) => ({
       transactions: state.transactions.filter((t) => !ids.includes(t.id)),
     }));
+    syncManager.scheduleSync();
   },
 
   setFilter: (key, value) => {

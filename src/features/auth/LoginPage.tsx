@@ -64,7 +64,7 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { login, signup } = useAuthStore();
+  const { login, signup, loginAsGuest } = useAuthStore();
   const { settings, setTheme, showToast } = useSettingsStore();
   const { baseCurrency, setBaseCurrency } = useCurrencyStore();
 
@@ -127,26 +127,32 @@ export const LoginPage: React.FC = () => {
 
   const onLogin = async (data: LoginFormValues) => {
     try {
-      const user = await login(data.email);
+      const user = await login(data.email, data.password);
       confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
       showToast(`Welcome back, ${user.name}!`, 'success');
       navigate(from, { replace: true });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      showToast('Failed to sign in', 'error');
+      showToast(e.message || 'Failed to sign in', 'error');
     }
   };
 
   const onSignup = async (data: SignupFormValues) => {
     try {
-      const user = await signup(data.name, data.email);
+      const user = await signup(data.name, data.email, data.password);
       confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
       showToast(`Account created! Welcome, ${user.name}!`, 'success');
       navigate(from, { replace: true });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      showToast('Failed to create account', 'error');
+      showToast(e.message || 'Failed to create account', 'error');
     }
+  };
+
+  const handleGuestLogin = () => {
+    const user = loginAsGuest();
+    showToast(`Entered as ${user.name} (Local Vault)`, 'info');
+    navigate(from, { replace: true });
   };
 
   const handleForgotPassword = (e: React.MouseEvent) => {
@@ -578,6 +584,18 @@ export const LoginPage: React.FC = () => {
                   </button>
                 </form>
               )}
+
+              {/* Optional Guest Access */}
+              <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleGuestLogin}
+                  className="w-full py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  <Wifi className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Continue as Guest (100% Offline Local Vault)</span>
+                </button>
+              </div>
 
               {/* Security & Client-Side Privacy Card */}
               <div className="mt-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-start gap-3 shadow-inner">

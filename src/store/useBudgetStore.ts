@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { BudgetGoal } from '../types';
 import { db } from '../db';
+import { syncManager } from '../lib/syncManager';
 import { format } from 'date-fns';
 
 interface BudgetState {
@@ -55,6 +56,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
         goal,
       ],
     }));
+    syncManager.scheduleSync();
   },
 
   deleteBudgetGoal: async (id: string) => {
@@ -62,6 +64,7 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
     set((state) => ({
       budgets: state.budgets.filter((b) => b.id !== id),
     }));
+    syncManager.scheduleSync();
   },
 
   getBudgetForCategory: (categoryId: string, period?: string) => {

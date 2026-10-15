@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { RecurrenceRule, Transaction } from '../types';
 import { db } from '../db';
+import { syncManager } from '../lib/syncManager';
 import { generatePendingRecurringTransactions } from '../utils/recurringEngine';
 import { useTransactionStore } from './useTransactionStore';
 
@@ -48,6 +49,7 @@ export const useRecurringStore = create<RecurringState>((set, get) => ({
 
     // Automatically check if an initial transaction needs generating
     await get().processRecurringRules();
+    syncManager.scheduleSync();
 
     return newRule;
   },
@@ -61,6 +63,7 @@ export const useRecurringStore = create<RecurringState>((set, get) => ({
     set((state) => ({
       rules: state.rules.map((r) => (r.id === rule.id ? updated : r)),
     }));
+    syncManager.scheduleSync();
   },
 
   toggleRuleActive: async (id: string, isActive: boolean) => {
@@ -75,6 +78,7 @@ export const useRecurringStore = create<RecurringState>((set, get) => ({
     set((state) => ({
       rules: state.rules.map((r) => (r.id === id ? updated : r)),
     }));
+    syncManager.scheduleSync();
   },
 
   deleteRule: async (id: string) => {
@@ -82,6 +86,7 @@ export const useRecurringStore = create<RecurringState>((set, get) => ({
     set((state) => ({
       rules: state.rules.filter((r) => r.id !== id),
     }));
+    syncManager.scheduleSync();
   },
 
   processRecurringRules: async () => {
