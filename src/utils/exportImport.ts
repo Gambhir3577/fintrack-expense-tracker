@@ -1,8 +1,53 @@
 import Papa from 'papaparse';
 import { db } from '../db';
 import { Transaction, Category } from '../types';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
-export function exportTransactionsToCSV(transactions: Transaction[], categories: Category[]): void {
+/**
+ * Native Share Sheet or Web Blob file download
+ */
+export async function shareOrDownloadFile(
+  filename: string,
+  content: string,
+  mimeType: string,
+  title: string
+): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const savedFile = await Filesystem.writeFile({
+        path: filename,
+        data: content,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+      });
+
+      await Share.share({
+        title,
+        text: `Exported ${title} from FinTrack AI`,
+        url: savedFile.uri,
+        dialogTitle: `Share or Save ${filename}`,
+      });
+      return;
+    } catch (err: any) {
+      console.warn('Native share error, falling back to browser download:', err);
+    }
+  }
+
+  // Web Browser fallback
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+export async function exportTransactionsToCSV(transactions: Transaction[], categories: Category[]): Promise<void> {
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
 
   const data = transactions.map((t) => ({
@@ -18,15 +63,8 @@ export function exportTransactionsToCSV(transactions: Transaction[], categories:
   }));
 
   const csv = Papa.unparse(data);
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `fintrack-transactions-${new Date().toISOString().split('T')[0]}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const filename = `fintrack-transactions-${new Date().toISOString().split('T')[0]}.csv`;
+  await shareOrDownloadFile(filename, csv, 'text/csv;charset=utf-8;', 'Transactions CSV');
 }
 
 export async function exportFullBackupJSON(): Promise<void> {
@@ -50,15 +88,8 @@ export async function exportFullBackupJSON(): Promise<void> {
   };
 
   const jsonStr = JSON.stringify(backupPayload, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `fintrack-backup-${new Date().toISOString().split('T')[0]}.json`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const filename = `fintrack-backup-${new Date().toISOString().split('T')[0]}.json`;
+  await shareOrDownloadFile(filename, jsonStr, 'application/json;charset=utf-8;', 'FinTrack JSON Backup');
 }
 
 export async function restoreBackupFromJSON(jsonString: string): Promise<{ success: boolean; message: string; counts?: { transactions: number; categories: number; budgets: number; rules: number } }> {
