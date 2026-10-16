@@ -15,6 +15,7 @@ import { SplitBillPage } from './features/split/SplitBillPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { AuthGuard } from './features/auth/AuthGuard';
 import { useAuthStore } from './store/useAuthStore';
+import { BiometricLockOverlay } from './components/common/BiometricLockOverlay';
 
 export function App() {
   const { loadAuth } = useAuthStore();
@@ -25,6 +26,9 @@ export function App() {
 
   return (
     <BrowserRouter>
+      {/* Global Biometric Lock Overlay */}
+      <BiometricLockOverlay />
+
       <Routes>
         {/* Public Login / Auth Route */}
         <Route path="/login" element={<LoginPage />} />

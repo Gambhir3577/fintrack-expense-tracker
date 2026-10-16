@@ -33,6 +33,7 @@ import {
   Bell,
   BellRing,
   Clock,
+  Fingerprint,
 } from 'lucide-react';
 import { syncManager, SyncStatus } from '../../lib/syncManager';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -46,6 +47,7 @@ import { useAIStore } from '../../store/useAIStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency, NotificationPreferences } from '../../types';
 import { requestNotificationPermission, sendNotification, syncScheduledNotifications } from '../../utils/nativeNotifications';
+import { checkBiometricAvailability, authenticateWithBiometrics, isNative as isNativeDevice } from '../../utils/nativeBiometrics';
 import { exportTransactionsToCSV, exportFullBackupJSON, restoreBackupFromJSON } from '../../utils/exportImport';
 import { loadDemoData } from '../../db/seedData';
 import { db } from '../../db';
@@ -215,6 +217,51 @@ export const SettingsPage: React.FC = () => {
       showToast('Test alert sent to device!', 'success');
     } else {
       showToast('Could not send notification. Please check notification permissions.', 'error');
+    }
+  };
+
+  const [biometryInfo, setBiometryInfo] = useState<{ isAvailable: boolean; title: string }>({
+    isAvailable: false,
+    title: 'Checking hardware...',
+  });
+
+  useEffect(() => {
+    checkBiometricAvailability().then((info) => {
+      setBiometryInfo({ isAvailable: info.isAvailable, title: info.biometryTitle });
+    });
+  }, []);
+
+  const handleToggleBiometricLock = async (enable: boolean) => {
+    if (enable) {
+      if (isNativeDevice) {
+        const avail = await checkBiometricAvailability();
+        if (!avail.isAvailable) {
+          showToast('No enrolled biometrics (Fingerprint/Face) found on device.', 'warning');
+          return;
+        }
+
+        const auth = await authenticateWithBiometrics('Verify fingerprint or face to enable App Lock');
+        if (!auth.success) {
+          showToast('Biometric verification cancelled or failed.', 'error');
+          return;
+        }
+      }
+
+      const currentSec = settings.security || { biometricLock: false, lockTimeoutMinutes: 0 };
+      await updateSettings({ security: { ...currentSec, biometricLock: true } });
+      showToast('Biometric App Lock enabled! Vault is now protected.', 'success');
+    } else {
+      if (isNativeDevice && settings.security?.biometricLock) {
+        const auth = await authenticateWithBiometrics('Verify fingerprint or face to disable App Lock');
+        if (!auth.success) {
+          showToast('Verification required to disable App Lock.', 'error');
+          return;
+        }
+      }
+
+      const currentSec = settings.security || { biometricLock: false, lockTimeoutMinutes: 0 };
+      await updateSettings({ security: { ...currentSec, biometricLock: false } });
+      showToast('Biometric App Lock disabled.', 'info');
     }
   };
 
@@ -747,6 +794,56 @@ export const SettingsPage: React.FC = () => {
             Enable notifications above to receive proactive budget warnings and payment reminders on this device.
           </p>
         )}
+      </div>
+
+      {/* 🛡️ Biometric Security & App Lock */}
+      <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-6 space-y-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Shield className="w-5 h-5 text-emerald-400" />
+              Biometric App Lock
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Require fingerprint or face recognition whenever FinTrack launches or resumes from the background.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Master Toggle */}
+            <button
+              type="button"
+              onClick={() => handleToggleBiometricLock(!settings.security?.biometricLock)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.security?.biometricLock ? 'bg-emerald-500' : 'bg-slate-700'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.security?.biometricLock ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-300">
+            <Fingerprint className="w-4 h-4 text-emerald-400" />
+            <span>Hardware Status:</span>
+            <span className="font-semibold text-white">{biometryInfo.title}</span>
+          </div>
+
+          <div className="text-[11px] text-slate-400">
+            {settings.security?.biometricLock ? (
+              <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Vault Protected on Exit
+              </span>
+            ) : (
+              <span>Disabled — Quick access enabled</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ☁️ Cloud Synchronization & Multi-Device Sync */}
