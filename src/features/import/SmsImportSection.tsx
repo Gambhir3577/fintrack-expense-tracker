@@ -223,6 +223,41 @@ export const SmsImportSection: React.FC = () => {
             Parse
           </button>
         </div>
+
+        {/* Quick Sample Test Chips */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <span className="text-[11px] text-slate-500 font-medium mr-1">Quick Samples:</span>
+          {[
+            { label: '🍕 Swiggy ₹450', text: 'Dear Customer, INR 450.00 debited from A/C ending 4901 on 16-OCT-26 to Swiggy. Avl Bal: INR 34,210.00.' },
+            { label: '🚗 Uber ₹850', text: 'Your a/c no. XX9876 is debited by Rs. 850.00 on 16Oct26 towards Uber India ref no 341291.' },
+            { label: '💼 Salary ₹75,000', text: 'Your Acct XX4321 is credited with INR 75,000.00 on 16-Oct-26 by Salary Oct 2026. Available Balance is INR 1,12,000.' },
+            { label: '🛒 Blinkit ₹2,199', text: 'Rs. 2,199.00 spent on Axis Bank Credit Card ending 7781 at Blinkit Groceries on 15-Oct-26.' },
+          ].map((sample, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setManualSmsText(sample.text);
+                const dummyMsg = {
+                  id: `sample-${Date.now()}-${idx}`,
+                  sender: 'SAMPLE',
+                  body: sample.text,
+                  date: Date.now(),
+                };
+                const parsed = parseSingleSms(dummyMsg, categories);
+                if (parsed) {
+                  setDrafts((prev) => [parsed, ...prev.filter((d) => d.rawText !== sample.text)]);
+                  setSelectedIds((prev) => new Set([...prev, parsed.id]));
+                  setHasScanned(true);
+                  showToast(`Parsed ${sample.label}!`, 'success');
+                }
+              }}
+              className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-[11px] font-medium transition-all cursor-pointer"
+            >
+              {sample.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Draft Review & Confirmation Table */}
