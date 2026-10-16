@@ -30,6 +30,9 @@ import {
   Cloud,
   CloudOff,
   Wifi,
+  Bell,
+  BellRing,
+  Clock,
 } from 'lucide-react';
 import { syncManager, SyncStatus } from '../../lib/syncManager';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -41,7 +44,8 @@ import { useRecurringStore } from '../../store/useRecurringStore';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { useAIStore } from '../../store/useAIStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
-import { SupportedCurrency } from '../../types';
+import { SupportedCurrency, NotificationPreferences } from '../../types';
+import { requestNotificationPermission, sendNotification, syncScheduledNotifications } from '../../utils/nativeNotifications';
 import { exportTransactionsToCSV, exportFullBackupJSON, restoreBackupFromJSON } from '../../utils/exportImport';
 import { loadDemoData } from '../../db/seedData';
 import { db } from '../../db';
@@ -86,7 +90,7 @@ export const SettingsPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarUploadRef = useRef<HTMLInputElement>(null);
 
-  const { settings, setTheme, showToast } = useSettingsStore();
+  const { settings, setTheme, showToast, updateSettings } = useSettingsStore();
   const { user, updateProfile, isCloudUser } = useAuthStore();
   const { transactions, loadTransactions } = useTransactionStore();
   const { categories, loadCategories } = useCategoryStore();
@@ -153,6 +157,65 @@ export const SettingsPage: React.FC = () => {
     updateProfile({ name: nameInput.trim() });
     setIsEditingName(false);
     showToast('Profile name updated successfully!', 'success');
+  };
+
+  const handleToggleNotifications = async (enable: boolean) => {
+    if (enable) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        showToast('Notification permission was not granted. Please enable notifications in device settings.', 'warning');
+        return;
+      }
+      showToast('Notifications enabled!', 'success');
+    }
+
+    const currentPrefs = settings.notifications || {
+      enabled: false,
+      budgetAlerts: true,
+      recurringReminders: true,
+      dailyReminder: false,
+      dailyReminderTime: '20:00',
+    };
+
+    const updated = {
+      ...currentPrefs,
+      enabled: enable,
+    };
+
+    await updateSettings({ notifications: updated });
+    await syncScheduledNotifications(updated);
+  };
+
+  const handleUpdateNotificationSubPref = async (key: keyof NotificationPreferences, value: any) => {
+    const currentPrefs = settings.notifications || {
+      enabled: false,
+      budgetAlerts: true,
+      recurringReminders: true,
+      dailyReminder: false,
+      dailyReminderTime: '20:00',
+    };
+
+    const updated = {
+      ...currentPrefs,
+      [key]: value,
+    };
+
+    await updateSettings({ notifications: updated });
+    await syncScheduledNotifications(updated);
+  };
+
+  const handleSendTestNotification = async () => {
+    const success = await sendNotification(
+      101,
+      '🔔 FinTrack Alert Test',
+      'This is a test notification from FinTrack AI. Your mobile alerts are working properly!',
+      'fintrack_alerts'
+    );
+    if (success) {
+      showToast('Test alert sent to device!', 'success');
+    } else {
+      showToast('Could not send notification. Please check notification permissions.', 'error');
+    }
   };
 
   const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -575,6 +638,114 @@ export const SettingsPage: React.FC = () => {
                 ))}
             </div>
           </div>
+        )}
+      </div>
+
+      {/* 🔔 Notifications & Smart Alerts */}
+      <div className="rounded-2xl bg-slate-900/80 border border-slate-800 p-6 space-y-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Bell className="w-5 h-5 text-emerald-400" />
+              Notifications & Smart Alerts
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Receive timely alerts on your device for budget limit warnings, bill due dates, and daily logging.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSendTestNotification}
+              disabled={!settings.notifications?.enabled}
+              className="px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 text-xs font-semibold text-slate-300 disabled:opacity-40 transition-all flex items-center gap-1.5"
+            >
+              <BellRing className="w-3.5 h-3.5 text-emerald-400" />
+              Test Alert
+            </button>
+
+            {/* Master Toggle */}
+            <button
+              type="button"
+              onClick={() => handleToggleNotifications(!settings.notifications?.enabled)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.notifications?.enabled ? 'bg-emerald-500' : 'bg-slate-700'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.notifications?.enabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {settings.notifications?.enabled ? (
+          <div className="space-y-3 pt-4 border-t border-slate-800/80">
+            {/* Sub-item: Budget Alerts */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div className="space-y-0.5 pr-4">
+                <p className="text-sm font-semibold text-white">Budget Threshold Warnings</p>
+                <p className="text-xs text-slate-400">
+                  Notify me when any category spending reaches 80% or exceeds 100% of its monthly limit.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={settings.notifications.budgetAlerts}
+                onChange={(e) => handleUpdateNotificationSubPref('budgetAlerts', e.target.checked)}
+                className="w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 cursor-pointer"
+              />
+            </div>
+
+            {/* Sub-item: Recurring Bill Reminders */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div className="space-y-0.5 pr-4">
+                <p className="text-sm font-semibold text-white">Upcoming Bill Reminders</p>
+                <p className="text-xs text-slate-400">
+                  Get notified 1 day before recurring subscriptions and utility bills are due.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={settings.notifications.recurringReminders}
+                onChange={(e) => handleUpdateNotificationSubPref('recurringReminders', e.target.checked)}
+                className="w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 cursor-pointer"
+              />
+            </div>
+
+            {/* Sub-item: Daily Expense Reminder */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 gap-3">
+              <div className="space-y-0.5 pr-4">
+                <p className="text-sm font-semibold text-white">Daily Expense Check-in</p>
+                <p className="text-xs text-slate-400">
+                  Daily evening prompt to record expenses and keep accounts balanced.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {settings.notifications.dailyReminder && (
+                  <input
+                    type="time"
+                    value={settings.notifications.dailyReminderTime || '20:00'}
+                    onChange={(e) => handleUpdateNotificationSubPref('dailyReminderTime', e.target.value)}
+                    className="rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1 text-xs text-white focus:border-emerald-500"
+                  />
+                )}
+                <input
+                  type="checkbox"
+                  checked={settings.notifications.dailyReminder}
+                  onChange={(e) => handleUpdateNotificationSubPref('dailyReminder', e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-900 cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500 italic">
+            Enable notifications above to receive proactive budget warnings and payment reminders on this device.
+          </p>
         )}
       </div>
 

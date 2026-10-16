@@ -18,6 +18,7 @@
     "@capacitor/camera": "^8.2.6",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
+    "@capacitor/local-notifications": "^8.3.1",
     "@hookform/resolvers": "^5.9.0",
     "@tailwindcss/vite": "^4.3.3",
     "canvas-confetti": "^1.9.4",

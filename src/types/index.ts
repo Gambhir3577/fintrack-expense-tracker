@@ -62,12 +62,27 @@ export interface CurrencyConfig {
   format: string;
 }
 
+export interface NotificationPreferences {
+  enabled: boolean;
+  budgetAlerts: boolean;
+  recurringReminders: boolean;
+  dailyReminder: boolean;
+  dailyReminderTime: string; // e.g. "20:00"
+}
+
+export interface SecurityPreferences {
+  biometricLock: boolean;
+  lockTimeoutMinutes: number;
+}
+
 export interface UserSettings {
   currency: SupportedCurrency;
   theme: 'dark' | 'light' | 'system';
   dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY';
   firstDayOfWeek: 0 | 1; // 0 = Sunday, 1 = Monday
   hasCompletedOnboarding: boolean;
+  notifications?: NotificationPreferences;
+  security?: SecurityPreferences;
 }
 
 export interface UserProfile {

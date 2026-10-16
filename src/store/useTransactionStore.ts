@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Transaction, TransactionType } from '../types';
 import { db } from '../db';
 import { syncManager } from '../lib/syncManager';
+import { checkAndTriggerBudgetAlerts } from '../utils/nativeNotifications';
 import { startOfMonth, endOfMonth, subMonths, format, parseISO, isWithinInterval } from 'date-fns';
 
 export type DateRangePreset = 'all' | 'this-month' | 'last-month' | 'last-90-days' | 'this-year' | 'custom';
@@ -88,6 +89,36 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       ),
     }));
     syncManager.scheduleSync();
+
+    // Trigger local notification if category exceeds budget threshold
+    if (newTx.type === 'expense') {
+      (async () => {
+        try {
+          const settings = await db.settings.get('app-settings');
+          const budgets = await db.budgets.toArray();
+          const currentPeriod = newTx.date.slice(0, 7);
+          const catBudget = budgets.find((b) => b.categoryId === newTx.categoryId && b.period === currentPeriod);
+          if (catBudget && catBudget.monthlyLimit > 0) {
+            const category = await db.categories.get(newTx.categoryId);
+            const allTxs = await db.transactions.toArray();
+            const totalSpent = allTxs
+              .filter((t) => t.type === 'expense' && t.categoryId === newTx.categoryId && t.date.startsWith(currentPeriod))
+              .reduce((sum, t) => sum + t.amount, 0);
+
+            await checkAndTriggerBudgetAlerts(
+              category?.name || 'Category',
+              newTx.categoryId,
+              totalSpent,
+              catBudget.monthlyLimit,
+              settings?.notifications
+            );
+          }
+        } catch (err) {
+          console.warn('Budget notification check failed:', err);
+        }
+      })();
+    }
+
     return newTx;
   },
 

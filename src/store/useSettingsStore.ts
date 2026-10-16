@@ -27,6 +27,17 @@ const defaultSettings: UserSettings = {
   dateFormat: 'YYYY-MM-DD',
   firstDayOfWeek: 1,
   hasCompletedOnboarding: false,
+  notifications: {
+    enabled: false,
+    budgetAlerts: true,
+    recurringReminders: true,
+    dailyReminder: false,
+    dailyReminderTime: '20:00',
+  },
+  security: {
+    biometricLock: false,
+    lockTimeoutMinutes: 0,
+  },
 };
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
