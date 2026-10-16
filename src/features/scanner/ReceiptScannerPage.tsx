@@ -26,6 +26,7 @@ import { useCurrencyStore } from '../../store/currencyStore';
 import { ReceiptScanResult } from '../../types';
 import { formatCurrency, formatDateString } from '../../utils/formatters';
 import { IconRenderer } from '../../components/common/IconRenderer';
+import { isNative, capturePhoto } from '../../utils/nativeCamera';
 import confetti from 'canvas-confetti';
 
 export const ReceiptScannerPage: React.FC = () => {
@@ -43,24 +44,27 @@ export const ReceiptScannerPage: React.FC = () => {
   const [editableDate, setEditableDate] = useState('');
   const [editableCategoryId, setEditableCategoryId] = useState('');
 
-  // Handle uploaded image
-  const handleImageFile = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      showToast('Please upload a valid image file (PNG, JPG, WebP)', 'error');
-      return;
+  // Process receipt image from either a File (web) or dataUrl (native camera)
+  const processReceiptImage = async (imageInput: File | string) => {
+    if (typeof imageInput === 'string') {
+      setImagePreview(imageInput);
+    } else {
+      if (!imageInput.type.startsWith('image/')) {
+        showToast('Please upload a valid image file (PNG, JPG, WebP)', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(imageInput);
     }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
 
     setIsScanning(true);
 
     try {
       // 1. Try real backend Gemini OCR proxy
-      const ocrResult = await api.ai.scanReceipt(file, baseCurrency);
+      const ocrResult = await api.ai.scanReceipt(imageInput, baseCurrency);
       
       const matchedCat = categories.find(
         (c) => c.name.toLowerCase() === ocrResult.categoryName.toLowerCase()
@@ -83,7 +87,7 @@ export const ReceiptScannerPage: React.FC = () => {
       setEditableDate(parsed.date);
       setEditableCategoryId(parsed.categoryId);
       setIsScanning(false);
-      showToast('Receipt scanned & extracted via Gemini 1.5 Flash!', 'success');
+      showToast('Receipt scanned & extracted via Gemini AI!', 'success');
     } catch (err: any) {
       console.warn('Backend OCR unavailable or error, falling back to local extractor:', err.message);
 
@@ -100,6 +104,27 @@ export const ReceiptScannerPage: React.FC = () => {
       setEditableCategoryId(parsed.categoryId);
       setIsScanning(false);
       showToast('Receipt scanned via offline parser', 'info');
+    }
+  };
+
+  const handleImageFile = (file: File) => {
+    processReceiptImage(file);
+  };
+
+  const handleCaptureNative = async (source: 'camera' | 'photos' | 'prompt' = 'prompt') => {
+    if (!isNative) {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    try {
+      const captured = await capturePhoto(source);
+      if (captured?.dataUrl) {
+        await processReceiptImage(captured.dataUrl);
+      }
+    } catch (err: any) {
+      console.error('Camera capture error:', err);
+      showToast(err.message || 'Failed to capture photo', 'error');
     }
   };
 
@@ -228,7 +253,7 @@ export const ReceiptScannerPage: React.FC = () => {
         {/* Left Column: Upload Dropzone & Image Preview (6 cols) */}
         <div className="lg:col-span-6 space-y-4">
           <div
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => handleCaptureNative('prompt')}
             className="p-8 border-2 border-dashed border-slate-800 hover:border-emerald-500/50 bg-slate-900/50 hover:bg-slate-900/80 rounded-2xl cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-3 shadow-xl group"
           >
             <input
@@ -247,19 +272,42 @@ export const ReceiptScannerPage: React.FC = () => {
 
             <div>
               <p className="text-sm font-bold text-white">
-                Upload Receipt Photo or Drag & Drop
+                {isNative ? 'Snap or Pick Receipt' : 'Upload Receipt Photo or Drag & Drop'}
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                Supports JPG, PNG, WebP (Camera shots or screenshots)
+                {isNative
+                  ? 'Take a photo with camera or choose from phone library'
+                  : 'Supports JPG, PNG, WebP (Camera shots or screenshots)'}
               </p>
             </div>
 
-            <button
-              type="button"
-              className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md transition-all"
-            >
-              Browse Image
-            </button>
+            {isNative ? (
+              <div className="flex items-center gap-3 pt-2" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  onClick={() => handleCaptureNative('camera')}
+                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Take Photo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCaptureNative('photos')}
+                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  Gallery
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md transition-all"
+              >
+                Browse Image
+              </button>
+            )}
           </div>
 
           {/* Scanned Image / Raw Text Preview */}
