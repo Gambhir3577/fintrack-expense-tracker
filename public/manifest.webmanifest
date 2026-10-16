@@ -1,7 +1,7 @@
 {
-  "id": "com.aurix.app",
-  "name": "Aurix Pro — AI Wealth & Expense Intelligence",
-  "short_name": "Aurix",
+  "id": "com.fintrack.app",
+  "name": "FinTrack AI — Smart Expense & Wealth Intelligence",
+  "short_name": "FinTrack AI",
   "description": "Next-generation personal wealth and expense intelligence with receipt scanner, savings goals, split bills, and AI Copilot.",
   "start_url": "/",
   "scope": "/",

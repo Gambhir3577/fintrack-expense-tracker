@@ -44,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 sm:px-6 pt-[env(safe-area-inset-top,0px)]">
       {/* Left Branding / Mobile Hamburger */}
       <div className="flex items-center gap-3">
         <button

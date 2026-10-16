@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { App as CapApp } from '@capacitor/app';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 import { Toast } from '../common/Toast';
@@ -12,6 +13,7 @@ import { useRecurringStore } from '../../store/useRecurringStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useCurrencyStore } from '../../store/currencyStore';
+import { useAIStore } from '../../store/useAIStore';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 import { AIFloatingButton } from '../ai/AIFloatingButton';
@@ -19,10 +21,13 @@ import { AIChatDrawer } from '../ai/AIChatDrawer';
 import { AmbientBackground } from '../common/AmbientBackground';
 
 export const AppLayout: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const { isOpen: isAIOpen, setIsOpen: setIsAIOpen } = useAIStore();
   const { loadTransactions } = useTransactionStore();
   const { loadCategories } = useCategoryStore();
   const { loadBudgets } = useBudgetStore();
@@ -30,6 +35,50 @@ export const AppLayout: React.FC = () => {
   const { loadSettings, showToast } = useSettingsStore();
   const { loadAuth } = useAuthStore();
   const { initCurrency, isFallback, error, refreshRates, isLoading: isCurrencyLoading } = useCurrencyStore();
+
+  // 🔙 Android Hardware Back Button Handler
+  useEffect(() => {
+    let lastBackPressTime = 0;
+
+    const backListenerPromise = CapApp.addListener('backButton', () => {
+      // 1. If AI drawer is open, close it
+      if (isAIOpen) {
+        setIsAIOpen(false);
+        return;
+      }
+
+      // 2. If Add Transaction modal is open, close it
+      if (isAddModalOpen) {
+        setIsAddModalOpen(false);
+        return;
+      }
+
+      // 3. If Mobile menu drawer is open, close it
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+        return;
+      }
+
+      // 4. If on sub-route, navigate back
+      if (location.pathname !== '/' && location.pathname !== '') {
+        navigate(-1);
+        return;
+      }
+
+      // 5. If on root route "/", require double-tap to exit
+      const now = Date.now();
+      if (now - lastBackPressTime < 2000) {
+        CapApp.exitApp();
+      } else {
+        lastBackPressTime = now;
+        showToast('Press back again to exit FinTrack', 'info');
+      }
+    });
+
+    return () => {
+      backListenerPromise.then((handle) => handle.remove()).catch(() => {});
+    };
+  }, [isAIOpen, isAddModalOpen, isMobileMenuOpen, location.pathname, navigate, setIsAIOpen, showToast]);
 
   useEffect(() => {
     async function init() {
