@@ -22,6 +22,7 @@ import { SplitGroup } from '../../types';
 import { formatCurrency, formatDateString } from '../../utils/formatters';
 import { SplitBillModal } from './SplitBillModal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { launchUPIPayment } from '../../utils/nativePayment';
 
 export const SplitBillPage: React.FC = () => {
   const { groups, loadGroups, deleteGroup, toggleSettle, calculateSettlements } = useSplitBillStore();
@@ -58,6 +59,15 @@ export const SplitBillPage: React.FC = () => {
     setCopiedUpiId(identifier);
     showToast('UPI Payment Link copied to clipboard!', 'success');
     setTimeout(() => setCopiedUpiId(null), 2500);
+  };
+
+  const handlePayUPI = async (upiLink: string, identifier: string) => {
+    const res = await launchUPIPayment(upiLink);
+    if (res.copied) {
+      setCopiedUpiId(identifier);
+      setTimeout(() => setCopiedUpiId(null), 2500);
+    }
+    showToast(res.message, res.opened ? 'success' : 'info');
   };
 
   const handleDelete = async () => {
@@ -252,13 +262,15 @@ export const SplitBillPage: React.FC = () => {
 
                             {debt.upiLink && (
                               <div className="flex items-center gap-1.5 shrink-0">
-                                <a
-                                  href={debt.upiLink}
-                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm transition-all"
+                                <button
+                                  type="button"
+                                  onClick={() => handlePayUPI(debt.upiLink!, debtId)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm transition-all active:scale-95 cursor-pointer"
+                                  title="Open UPI App (GPay, PhonePe, Paytm, BHIM)"
                                 >
                                   <span>Pay UPI</span>
                                   <ExternalLink className="w-3 h-3" />
-                                </a>
+                                </button>
 
                                 <button
                                   type="button"
