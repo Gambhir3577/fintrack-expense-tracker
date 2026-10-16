@@ -11,6 +11,7 @@ import {
   Sparkles,
   Download,
   AlertCircle,
+  MessageSquare,
 } from 'lucide-react';
 import { parseCSVFile, detectColumnMapping, processParsedRows } from '../../utils/csvParser';
 import { useTransactionStore } from '../../store/useTransactionStore';
@@ -20,6 +21,7 @@ import { useCurrencyStore } from '../../store/currencyStore';
 import { CSVColumnMapping, CSVParsedRow, TransactionType } from '../../types';
 import { formatCurrency, formatDateString } from '../../utils/formatters';
 import { IconRenderer } from '../../components/common/IconRenderer';
+import { SmsImportSection } from './SmsImportSection';
 import confetti from 'canvas-confetti';
 
 export const CSVImportPage: React.FC = () => {
@@ -30,6 +32,9 @@ export const CSVImportPage: React.FC = () => {
   const { categories } = useCategoryStore();
   const { showToast } = useSettingsStore();
   const { baseCurrency } = useCurrencyStore();
+
+  // Tab switch: CSV Statement vs Android SMS
+  const [sourceType, setSourceType] = useState<'csv' | 'sms'>('csv');
 
   // Wizard Steps: 1: Upload -> 2: Map Columns -> 3: Preview & Confirm
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -201,28 +206,68 @@ export const CSVImportPage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in pb-12">
-      {/* Header */}
+      {/* Header with Source Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            CSV Bank Statement Import
+            {sourceType === 'csv' ? 'CSV Bank Statement Import' : 'Android Bank SMS Auto-Import'}
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Import transactions from any bank with smart column mapping and auto-categorization
+            {sourceType === 'csv'
+              ? 'Import transactions from any bank CSV with smart column mapping'
+              : 'Parse transaction alerts 100% on-device directly from bank and UPI SMS'}
           </p>
         </div>
 
-        <button
-          onClick={handleDownloadSampleCSV}
-          className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-colors self-start sm:self-auto"
-        >
-          <Download className="w-4 h-4 text-slate-400" />
-          <span>Download Sample CSV</span>
-        </button>
+        <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-900 border border-slate-800 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setSourceType('csv')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              sourceType === 'csv'
+                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>CSV Statement</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSourceType('sms')}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              sourceType === 'sms'
+                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Bank SMS</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-950/70 text-emerald-400 font-bold border border-emerald-500/30">
+              On-Device
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* Wizard Progress Steps Indicator */}
-      <div className="grid grid-cols-3 gap-3 p-1.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs font-semibold">
+      {sourceType === 'sms' ? (
+        <SmsImportSection />
+      ) : (
+        <>
+          {/* Top Actions: Sample CSV */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleDownloadSampleCSV}
+              className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-colors"
+            >
+              <Download className="w-4 h-4 text-slate-400" />
+              <span>Download Sample CSV</span>
+            </button>
+          </div>
+
+          {/* Wizard Progress Steps Indicator */}
+          <div className="grid grid-cols-3 gap-3 p-1.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs font-semibold">
         <div
           className={`flex items-center justify-center gap-2 py-2 rounded-xl transition-all ${
             step === 1
@@ -596,6 +641,8 @@ export const CSVImportPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
