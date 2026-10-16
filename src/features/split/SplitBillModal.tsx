@@ -4,8 +4,9 @@ import { SplitGroup, SplitMember, SplitDetail } from '../../types';
 import { useSplitBillStore } from '../../store/useSplitBillStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useCurrencyStore } from '../../store/currencyStore';
-import { Users, Plus, Trash2, DollarSign, Calendar, QrCode } from 'lucide-react';
+import { Users, Plus, Trash2, DollarSign, Calendar, QrCode, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
+import { pickContact } from '../../utils/nativeContacts';
 
 interface SplitBillModalProps {
   isOpen: boolean;
@@ -82,6 +83,24 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
       upiId: '',
     };
     setMembers([...members, newMember]);
+  };
+
+  const handlePickContact = async () => {
+    try {
+      const contact = await pickContact();
+      if (!contact) return; // User cancelled
+
+      const newMember: SplitMember = {
+        id: `mem-${Date.now()}-${members.length + 1}`,
+        name: contact.name,
+        upiId: contact.upiId || '',
+      };
+      setMembers((prev) => [...prev, newMember]);
+      showToast(`Added ${contact.name} from contacts!`, 'success');
+    } catch (err: any) {
+      console.warn('Contact picker error:', err);
+      showToast(err?.message || 'Could not access contacts. Check permissions.', 'warning');
+    }
   };
 
   const handleRemoveMember = (id: string) => {
@@ -249,14 +268,24 @@ export const SplitBillModal: React.FC<SplitBillModalProps> = ({
               <Users className="w-4 h-4 text-emerald-400" />
               Group Members ({members.length})
             </label>
-            <button
-              type="button"
-              onClick={handleAddMember}
-              className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Person</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handlePickContact}
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Pick from Contacts</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleAddMember}
+                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Person</span>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2.5 max-h-56 overflow-y-auto p-1 bg-slate-950/60 rounded-xl border border-slate-800/80">
