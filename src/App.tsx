@@ -16,6 +16,7 @@ import { LoginPage } from './features/auth/LoginPage';
 import { AuthGuard } from './features/auth/AuthGuard';
 import { useAuthStore } from './store/useAuthStore';
 import { BiometricLockOverlay } from './components/common/BiometricLockOverlay';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 export function App() {
   const { loadAuth } = useAuthStore();
@@ -25,11 +26,12 @@ export function App() {
   }, [loadAuth]);
 
   return (
-    <BrowserRouter>
-      {/* Global Biometric Lock Overlay */}
-      <BiometricLockOverlay />
+    <ErrorBoundary>
+      <BrowserRouter>
+        {/* Global Biometric Lock Overlay */}
+        <BiometricLockOverlay />
 
-      <Routes>
+        <Routes>
         {/* Public Login / Auth Route */}
         <Route path="/login" element={<LoginPage />} />
 
@@ -59,6 +61,7 @@ export function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

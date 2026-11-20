@@ -6,11 +6,13 @@ import { useCurrencyStore } from '../../../store/currencyStore';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 import { parseNaturalLanguageTransaction, ParsedTransactionDraft } from '../../../lib/aiService';
 import { formatCurrency } from '../../../utils/formatters';
+import { VoiceCommandButton } from '../../../components/common/VoiceCommandButton';
 import confetti from 'canvas-confetti';
 
 export const AITransactionQuickInput: React.FC = () => {
   const [input, setInput] = useState('');
   const [draft, setDraft] = useState<ParsedTransactionDraft | null>(null);
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
   const { categories } = useCategoryStore();
   const { addTransaction } = useTransactionStore();
   const { baseCurrency } = useCurrencyStore();
@@ -72,11 +74,25 @@ export const AITransactionQuickInput: React.FC = () => {
             type="text"
             value={input}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder='Type naturally (e.g. "Paid ₹750 for groceries at Zepto yesterday" or "Freelance payment ₹12,000 received")...'
-            className="w-full rounded-xl bg-slate-950/80 border border-slate-700/60 pl-3.5 pr-20 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+            placeholder={
+              isVoiceListening
+                ? 'Listening to voice command...'
+                : 'Type or speak naturally (e.g. "Paid ₹750 for groceries at Zepto" or "Salary ₹80,000")...'
+            }
+            className={`w-full rounded-xl bg-slate-950/80 border pl-3.5 pr-28 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
+              isVoiceListening
+                ? 'border-rose-500/80 focus:border-rose-400 ring-1 ring-rose-500/30'
+                : 'border-slate-700/60 focus:border-indigo-500'
+            }`}
           />
 
-          <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            <VoiceCommandButton
+              size="sm"
+              onTranscript={(text) => handleInputChange(text)}
+              onFinalResult={(finalText) => handleInputChange(finalText)}
+              onListeningChange={setIsVoiceListening}
+            />
             <button
               type="submit"
               disabled={!draft}

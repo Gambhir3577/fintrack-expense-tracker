@@ -16,6 +16,8 @@ import {
   User,
   Check,
   Settings as SettingsIcon,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAIStore } from '../../store/useAIStore';
@@ -24,6 +26,9 @@ import { useCategoryStore } from '../../store/useCategoryStore';
 import { useBudgetStore } from '../../store/useBudgetStore';
 import { useRecurringStore } from '../../store/useRecurringStore';
 import { useCurrencyStore } from '../../store/currencyStore';
+import { VoiceCommandButton } from '../../components/common/VoiceCommandButton';
+import { AIWaveform } from '../../components/common/AIWaveform';
+import { speakText, stopSpeaking, isSpeechSynthesisSupported } from '../../utils/nativeVoice';
 import {
   FinancialContext,
   generateFinancialAuditReport,
@@ -42,6 +47,8 @@ export const AIAssistantPage: React.FC = () => {
   const { baseCurrency, convert } = useCurrencyStore();
 
   const [inputPrompt, setInputPrompt] = useState('');
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -344,13 +351,52 @@ export const AIAssistantPage: React.FC = () => {
 
                   <div className={`space-y-3 max-w-[85%] ${isUser ? 'items-end' : 'items-start'}`}>
                     <div
-                      className={`p-3.5 rounded-2xl leading-relaxed whitespace-pre-wrap ${
+                      className={`p-3.5 rounded-2xl leading-relaxed whitespace-pre-wrap relative group ${
                         isUser
                           ? 'bg-emerald-500 text-slate-950 font-medium rounded-tr-sm shadow-md'
                           : 'bg-slate-950/80 border border-slate-800 text-slate-200 rounded-tl-sm shadow-inner'
                       }`}
                     >
                       {msg.content}
+
+                      {/* Text-to-Speech Readout Button for AI messages */}
+                      {!isUser && isSpeechSynthesisSupported() && (
+                        <div className="pt-2 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (speakingMsgId === msg.id) {
+                                stopSpeaking();
+                                setSpeakingMsgId(null);
+                              } else {
+                                setSpeakingMsgId(msg.id);
+                                speakText(msg.content, {
+                                  onEnd: () => setSpeakingMsgId(null),
+                                  onError: () => setSpeakingMsgId(null),
+                                });
+                              }
+                            }}
+                            className={`p-1 px-2 rounded-lg text-[11px] font-medium transition-all flex items-center gap-1.5 ${
+                              speakingMsgId === msg.id
+                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm animate-pulse'
+                                : 'bg-slate-900/90 text-slate-400 hover:text-emerald-300 border border-slate-800'
+                            }`}
+                            title={speakingMsgId === msg.id ? 'Stop reading' : 'Read aloud'}
+                          >
+                            {speakingMsgId === msg.id ? (
+                              <>
+                                <VolumeX className="w-3 h-3 text-rose-400" />
+                                <span>Stop Reading</span>
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="w-3 h-3 text-emerald-400" />
+                                <span>Read Aloud</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action Cards */}
@@ -408,6 +454,18 @@ export const AIAssistantPage: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Live Voice Listening Banner */}
+          {isVoiceListening && (
+            <div className="px-4 py-2 bg-gradient-to-r from-rose-950/70 via-slate-950 to-rose-950/70 border-t border-rose-500/30 flex items-center justify-between text-xs text-rose-300 animate-fade-in">
+              <div className="flex items-center gap-2.5">
+                <AIWaveform isActive={true} />
+                <span className="font-semibold text-rose-200">Listening to voice command...</span>
+                {inputPrompt && <span className="text-white font-medium italic">"{inputPrompt}"</span>}
+              </div>
+              <span className="text-[10px] text-rose-400 font-mono">Speak naturally</span>
+            </div>
+          )}
+
           {/* Quick Suggestion Chips */}
           <div className="px-4 py-2 bg-slate-950/70 border-t border-slate-800 overflow-x-auto no-scrollbar flex items-center gap-2">
             <button
@@ -442,9 +500,15 @@ export const AIAssistantPage: React.FC = () => {
               type="text"
               value={inputPrompt}
               onChange={(e) => setInputPrompt(e.target.value)}
-              placeholder='Ask anything or type "Paid ₹1,200 for groceries at Blinkit"...'
+              placeholder='Ask anything, speak or type "Paid ₹1,200 for groceries at Blinkit"...'
               disabled={isThinking}
               className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"
+            />
+            <VoiceCommandButton
+              onTranscript={(transcript) => setInputPrompt(transcript)}
+              onFinalResult={(finalResult) => setInputPrompt(finalResult)}
+              onListeningChange={setIsVoiceListening}
+              disabled={isThinking}
             />
             <button
               type="submit"

@@ -8,11 +8,13 @@ import { useSettingsStore } from '../../../store/useSettingsStore';
 import { parseNaturalLanguageTransaction, ParsedTransactionDraft } from '../../../lib/aiService';
 import { formatCurrency } from '../../../utils/formatters';
 import { AIWaveform } from '../../../components/common/AIWaveform';
+import { VoiceCommandButton } from '../../../components/common/VoiceCommandButton';
 import confetti from 'canvas-confetti';
 
 export const DashboardAICommandBar: React.FC = () => {
   const [query, setQuery] = useState('');
   const [draft, setDraft] = useState<ParsedTransactionDraft | null>(null);
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
   const { categories } = useCategoryStore();
   const { addTransaction } = useTransactionStore();
   const { baseCurrency } = useCurrencyStore();
@@ -114,10 +116,24 @@ export const DashboardAICommandBar: React.FC = () => {
             type="text"
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder='Try "Paid ₹450 for lunch at Subway" or "Audit my financial health"...'
-            className="w-full rounded-xl bg-slate-950/80 border border-slate-700/80 pl-4 pr-24 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 shadow-inner transition-all"
+            placeholder={
+              isVoiceListening
+                ? 'Listening to voice command...'
+                : 'Try "Paid ₹450 for lunch at Subway" or speak a command...'
+            }
+            className={`w-full rounded-xl bg-slate-950/80 border pl-4 pr-32 sm:pr-36 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 shadow-inner transition-all ${
+              isVoiceListening
+                ? 'border-rose-500/80 focus:border-rose-400 focus:ring-rose-500/40 ring-1 ring-rose-500/30'
+                : 'border-slate-700/80 focus:border-indigo-500 focus:ring-indigo-500/50'
+            }`}
           />
-          <div className="absolute right-1.5 flex items-center gap-1">
+          <div className="absolute right-1.5 flex items-center gap-1.5">
+            <VoiceCommandButton
+              size="sm"
+              onTranscript={(text) => handleInputChange(text)}
+              onFinalResult={(finalText) => handleInputChange(finalText)}
+              onListeningChange={setIsVoiceListening}
+            />
             {draft ? (
               <button
                 type="button"

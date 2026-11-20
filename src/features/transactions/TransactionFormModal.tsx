@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,7 +12,9 @@ import { useSettingsStore } from '../../store/useSettingsStore';
 import { useCurrencyStore } from '../../store/currencyStore';
 import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { IconRenderer } from '../../components/common/IconRenderer';
-import { ArrowUpRight, ArrowDownLeft, Calendar, Tag, FileText, Repeat } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Calendar, Tag, FileText, Repeat, Sparkles } from 'lucide-react';
+import { VoiceCommandButton } from '../../components/common/VoiceCommandButton';
+import { parseNaturalLanguageTransaction } from '../../lib/aiService';
 
 const transactionSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -51,6 +53,7 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
     handleSubmit,
     control,
     watch,
+    getValues,
     setValue,
     reset,
     formState: { errors, isSubmitting },
@@ -71,10 +74,12 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
   const selectedType = watch('type');
   const isRecurring = watch('isRecurring');
 
-  // Filter categories based on transaction type
-  const availableCategories = categories.filter(
-    (c) => c.type === 'both' || c.type === selectedType
-  );
+  // Filter categories based on transaction type with useMemo to prevent re-creation loops
+  const availableCategories = useMemo(() => {
+    return (categories || []).filter(
+      (c) => c.type === 'both' || c.type === selectedType
+    );
+  }, [categories, selectedType]);
 
   useEffect(() => {
     if (isOpen) {
@@ -103,16 +108,17 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
         });
       }
     }
-  }, [isOpen, initialData, reset]);
+  }, [isOpen, initialData]);
 
-  // Set default category when type switches
+  // Set default category when type switches (guarded against infinite loops)
   useEffect(() => {
-    const currentCatId = watch('categoryId');
+    if (!isOpen) return;
+    const currentCatId = getValues('categoryId');
     const isValidForType = availableCategories.some((c) => c.id === currentCatId);
     if (!isValidForType && availableCategories.length > 0) {
-      setValue('categoryId', availableCategories[0].id);
+      setValue('categoryId', availableCategories[0].id, { shouldValidate: true });
     }
-  }, [selectedType, availableCategories, setValue, watch]);
+  }, [selectedType, availableCategories, isOpen]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     try {
@@ -177,6 +183,34 @@ export const TransactionFormModal: React.FC<TransactionFormModalProps> = ({
       maxWidth="md"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Quick Voice Auto-Fill Banner */}
+        {!initialData && (
+          <div className="flex items-center justify-between p-2.5 px-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-slate-300">
+                Tap mic to auto-fill: <span className="text-slate-400 italic">"Paid ₹450 for coffee"</span>
+              </span>
+            </div>
+            <VoiceCommandButton
+              onFinalResult={(transcript) => {
+                const parsed = parseNaturalLanguageTransaction(transcript, categories);
+                if (parsed) {
+                  setValue('type', parsed.type);
+                  if (parsed.amount > 0) setValue('amount', parsed.amount);
+                  if (parsed.description) setValue('description', parsed.description);
+                  if (parsed.categoryId) setValue('categoryId', parsed.categoryId);
+                  if (parsed.date) setValue('date', parsed.date);
+                  showToast(`Auto-filled: ${parsed.description} (${parsed.amount})`, 'info');
+                }
+              }}
+              size="sm"
+            />
+          </div>
+        )}
+
         {/* Type Toggle */}
         <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
           <button
