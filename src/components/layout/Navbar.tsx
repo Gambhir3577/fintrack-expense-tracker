@@ -9,6 +9,7 @@ import { CURRENCY_CONFIGS } from '../../utils/constants';
 import { SupportedCurrency } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from '../common/BrandLogo';
+import { VoiceCommandButton } from '../common/VoiceCommandButton';
 
 interface NavbarProps {
   onOpenAddModal: () => void;
@@ -119,6 +120,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Moon className="w-4 h-4 text-indigo-400" />
           )}
         </button>
+
+        {/* Global Voice Command Button */}
+        <VoiceCommandButton
+          size="md"
+          title="Voice Command (Tap or Hold to speak)"
+          onFinalResult={(transcript) => {
+            // If user spoke a query or transaction, trigger AI Copilot or Add Modal
+            toggleAIOpen();
+          }}
+        />
 
         {/* AI Copilot Quick Action */}
         <button

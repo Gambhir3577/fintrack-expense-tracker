@@ -14,6 +14,7 @@ import {
   Users,
   Camera,
   PiggyBank,
+  Bot,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { loadDemoData } from '../../db/seedData';
@@ -43,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/ai-assistant', label: 'AI Voice & Copilot', icon: Bot },
     { to: '/transactions', label: 'Transactions', icon: Receipt },
     { to: '/receipt-scanner', label: 'Receipt Scanner', icon: Camera },
     { to: '/goals', label: 'Savings Goals', icon: PiggyBank },

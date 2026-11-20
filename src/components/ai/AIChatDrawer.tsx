@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Send,
@@ -159,8 +160,8 @@ export const AIChatDrawer: React.FC = () => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+  const drawerContent = (
+    <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity animate-fade-in"
@@ -482,4 +483,8 @@ export const AIChatDrawer: React.FC = () => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(drawerContent, document.body)
+    : drawerContent;
 };
